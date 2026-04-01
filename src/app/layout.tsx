@@ -5,6 +5,9 @@ import { BottomNav } from '@/components'
 export const metadata: Metadata = {
   title: 'Sdrogo Corse Dashboard 2026',
   description: 'Racing telemetry dashboard for Sdrogo Corse - GTA V racing championships',
+  icons: {
+    icon: '/assets/melagoodo-logo.png',
+  },
 }
 
 export default function RootLayout({
