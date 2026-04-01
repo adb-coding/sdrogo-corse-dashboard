@@ -41,7 +41,7 @@ export function PerformanceChart({ players }: PerformanceChartProps) {
   if (players.length === 0) return null
 
   const playerColor = getPlayerColor(selectedPlayer)
-  const yDomain = viewMode === 'posizione' ? [1, Math.max(players.length, 1)] : [0, 'auto']
+  const yDomain: [number, number | 'auto'] = viewMode === 'posizione' ? [1, Math.max(players.length, 1)] : [0, 'auto']
 
   return (
     <div className="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg p-6 shadow-xl">

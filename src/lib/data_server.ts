@@ -98,6 +98,7 @@ export function processPlayerStats(entries: RaceEntry[]): PlayerStats[] {
       form,
       raceScores: playerEntries.map(e => e.punteggiSingoleGare),
       positions,
+      elencoIds: playerEntries.map(e => e.elencoId),
       totalRaces,
       images
       })

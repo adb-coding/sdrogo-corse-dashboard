@@ -13,6 +13,14 @@ interface TopThreeProps {
   players: PlayerStats[]
 }
 
+interface PodiumCardProps {
+  player: PlayerStats
+  rank: number
+  color: string
+  isWinner?: boolean
+  metric: SortMetric
+}
+
 const METRIC_CONFIG: Record<SortMetric, { label: string; unit: string; better: 'higher' | 'lower' }> = {
   totalPoints: { label: 'Punti Totali', unit: 'pt', better: 'higher' },
   avgPoints: { label: 'Media Punti', unit: 'pt', better: 'higher' },
