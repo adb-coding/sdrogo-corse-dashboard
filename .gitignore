@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+
+# Vercel
+.vercel/
+
+# Production
+/build
+
+# Misc
+.DS_Store
+*.pem
+tsconfig.tsbuildinfo
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local Env Files
+.env*.local
+.env
+
+# Project specific
+adding_title.ipynb
+
+# If you want to keep AGENTS.md private, uncomment the line below:
+AGENTS.md
+
+# IMPORTANT: The primary data source is now in public/sdrogo_corse_stats.csv.
+# We are NOT ignoring it because it is required for the app to function after deployment.
