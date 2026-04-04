@@ -275,7 +275,8 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
       { key: 'Media', label: 'Media', weight: 0.25 },
       { key: 'Vittorie', label: 'Vittorie', weight: 0.20 },
       { key: 'Elenchi', label: 'Elenchi', weight: 0.10 },
-      { key: 'Piazzam.', label: 'Piazzam.', weight: 0.20 },
+      { key: 'Piazzam.', label: 'Piazzam.', weight: 0.10 },
+      { key: 'Affidabilità', label: 'Affidabilità', weight: 0.10}
     ]
 
     let totalScore = 0
@@ -290,6 +291,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
         if (m.key === 'Vittorie') return (p.playlistsWon / p.playlistsPlayed) * 100
         if (m.key === 'Elenchi') return (p.playlistsPlayed / totalPlaylistsCount) * 100
         if (m.key === 'Piazzam.') return Math.max(0, 100 - (p.avgPosition - 1) * 20)
+        if (m.key === 'Affidabilità') return ((p.totalRaces - p.dnfCount )/ p.totalRaces ) * 100
         return 0
       }
 
@@ -378,9 +380,11 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
           </div>
 
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-            <span className="px-3 py-1 bg-zinc-800 rounded text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400 border border-zinc-700">
-              Pro Driver
-            </span>
+            {player.tag.map(t => (
+              <span key={t} className="px-3 py-1 bg-zinc-800 rounded text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400 border border-zinc-700">
+                {t}
+              </span>
+            ))}
             <span className="px-3 py-1 bg-red-600/10 text-red-500 rounded text-[10px] font-mono font-bold uppercase tracking-widest border border-red-500/20">
               Season 2026
             </span>
@@ -559,6 +563,10 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                     <div>
                       <div className="text-[10px] font-black uppercase text-red-500 mb-1">Piazzam.</div>
                       <p className="text-[9px] text-zinc-400 leading-relaxed font-mono">Qualità del piazzamento medio. Perde il 20% per ogni posizione oltre la prima.</p>
+                    </div>
+                    <div>
+                      <div className="text-[10px] font-black uppercase text-red-500 mb-1">Affidabilità.</div>
+                      <p className="text-[9px] text-zinc-400 leading-relaxed font-mono">Resistenza ai "NON ARRIVATO". Percentuale di gare completate su quelle corse. </p>
                     </div>
                   </div>
                 </div>

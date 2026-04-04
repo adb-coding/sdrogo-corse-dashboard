@@ -14,7 +14,9 @@ export interface PlayerStats {
   positions: number[]
   elencoIds: number[]
   totalRaces: number
+  dnfCount: number
   images: string[]
+  tag: string[]
 }
 
 export interface PlaylistData {
