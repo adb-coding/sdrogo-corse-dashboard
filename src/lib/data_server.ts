@@ -12,6 +12,16 @@ const getPlayerImage = (normalizedName: string): string | null => {
   return getPlayerImageFromColors(normalizedName)
 }
 
+const PLAYER_TAGS: Record<string, string[]> = {
+  Marza: ['Marzone'],
+  Dread: ['Dreddonico Bobby'],
+  Gabbo: ['GabboDiSqualo'],
+  Masseo: ['Ghesboro'],
+  Rohn: ['Just Fucking Just'],
+  Mollu: ['Non Pippo Più'],
+  JTaz: ['Titti2']
+};
+
 export function parseCSV(): RaceEntry[] {
   const text = readFileSync('public/sdrogo_corse_stats.csv', 'utf-8').replace(/^\uFEFF/, '')
   
@@ -63,6 +73,7 @@ export function processPlayerStats(entries: RaceEntry[]): PlayerStats[] {
   const stats: PlayerStats[] = []
   
   for (const [name, playerEntries] of playerMap) {
+    const playerTags = PLAYER_TAGS[name] || [];
     const totalPoints = playerEntries.reduce((sum, e) => sum + e.puntiTotali, 0)
     const playlistsPlayed = playerEntries.length
     const totalRaces = playerEntries.reduce((sum, e) => sum + e.numGare, 0)
@@ -77,6 +88,7 @@ export function processPlayerStats(entries: RaceEntry[]): PlayerStats[] {
     
     const allScores = playerEntries.map(e => e.punteggiSingoleGare).flat()
     const form = getLast5PlaylistScores(playerEntries)
+    const dnfCount = allScores.filter(score => score === 0).length
     
     const positions = calculatePositions(playerEntries, entries)
     const avgPosition = Number((positions.reduce((a, b) => a + b, 0) / positions.length).toFixed(2))
@@ -100,7 +112,9 @@ export function processPlayerStats(entries: RaceEntry[]): PlayerStats[] {
       positions,
       elencoIds: playerEntries.map(e => e.elencoId),
       totalRaces,
-      images
+      dnfCount,
+      images,
+      tag: playerTags
       })
       }
   
