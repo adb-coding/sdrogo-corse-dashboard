@@ -13,6 +13,7 @@ const getPlayerImage = (normalizedName: string): string | null => {
 
 const PLAYER_TAGS: Record<string, string[]> = {
   Marza: ['Marzone'],
+  Delux: ['Addobboland'],
   Dread: ['Dreddonico Bobby'],
   Gabbo: ['GabboDiSqualo'],
   Masseo: ['Ghesboro'],
