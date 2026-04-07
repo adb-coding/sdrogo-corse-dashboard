@@ -7,6 +7,12 @@ export const PLAYER_COLORS: Record<string, string> = {
   Masseo: "#3b82f6",
   JTaz: "#78350f",
   Marza: "#fbbf24",
+  Blur: '#830b0be0',
+  Zano: '#1c1e9ebd',
+  Zaamp: '#18afddef',
+  Frax: '#412005ee',
+  'Johnny Creek': '#e6dddd',
+  Ladyhila: '#db4ee7ec'
 }
 
 export const PLAYER_IMAGES: Record<string, string> = {
@@ -18,6 +24,12 @@ export const PLAYER_IMAGES: Record<string, string> = {
   Masseo: '/assets/masseo.png',
   JTaz: '/assets/jtaz.png',
   Marza: '/assets/marza.png',
+  Ladyhila: '/assets/hila.png',
+  Zano: '/assets/zano.png',
+  Blur: '/assets/blur.png',
+  Zaamp: '/assets/zamp.png',
+  'Johnny Creek': '/assets/jcreek.png',
+  Frax: '/assets/frax.png'
 }
 
 export const getPlayerColor = (name: string): string => {
@@ -35,6 +47,7 @@ export const normalizePlayerName = (name: string): string => {
   const lower = normalizedName.toLowerCase()
   if (lower === 'jtaz') return 'JTaz'
   if (lower.includes('just rohn') || lower === 'rohn') return 'Rohn'
+  if (lower.includes('johnny creek') ||lower === 'creek') return 'Johnny Creek'
   return normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1).toLowerCase()
 }
 

@@ -152,7 +152,7 @@ export function processPlayerStats(entries: RaceEntry[]): PlayerStats[] {
   }
   
   return stats
-    .filter(p => p.playlistsPlayed >= 4)
+    .filter(p => p.playlistsPlayed >= 7)
     .sort((a, b) => b.totalPoints - a.totalPoints)
   }
 

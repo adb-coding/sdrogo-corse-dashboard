@@ -28,6 +28,12 @@ const config: Config = {
           masseo: '#3b82f6',
           jtaz: '#78350f',
           marza: '#fbbf24',
+          blur: '#830b0be0',
+          zano: '#1c1e9ebd',
+          zamp: '#18afddef',
+          frax: '#412005ee',
+          johnny: '#e6dddd',
+          hila: '#db4ee7ec'
         },
       },
       fontFamily: {
