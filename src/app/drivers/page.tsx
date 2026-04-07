@@ -4,25 +4,30 @@ import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, User, Trophy, Activity, Target, ShieldCheck, X, ExternalLink, Info, ChevronDown, Check, Youtube, Instagram, Twitch } from 'lucide-react'
-import { Header } from '@/components'
-import { parseCSV, processPlayerStats, getHeadToHead } from '@/lib/data'
+import { Header, SeasonFilter } from '@/components'
+import { parseCSV, processPlayerStats, getHeadToHead, filterEntriesBySeason, getAvailableYears } from '@/lib/data'
 import { getPlayerColor } from '@/lib/colors'
 import { PlayerStats, RaceEntry } from '@/types'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AreaChart, Area, LineChart, Line, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts'
 
 export default function DriversPage() {
-// ... rest of code unchanged until DriverProfile
-
+  const [seasons, setSeasons] = useState<string[]>(['all'])
   const [players, setPlayers] = useState<PlayerStats[]>([])
   const [allEntries, setAllEntries] = useState<RaceEntry[]>([])
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerStats | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const availableYears = useMemo(() => getAvailableYears(allEntries), [allEntries])
+
+  const filteredEntries = useMemo(() => {
+    return filterEntriesBySeason(allEntries, seasons)
+  }, [allEntries, seasons])
+
   useEffect(() => {
     async function loadData() {
       try {
-        const entries = await parseCSV('/sdrogo_corse_stats.csv')
+        const entries = await parseCSV('/sdrogo_corse_final.csv')
         setAllEntries(entries)
         const playerStats = processPlayerStats(entries)
         setPlayers(playerStats)
@@ -35,6 +40,18 @@ export default function DriversPage() {
     
     loadData()
   }, [])
+
+  useEffect(() => {
+    if (allEntries.length > 0) {
+      const playerStats = processPlayerStats(filteredEntries)
+      setPlayers(playerStats)
+      
+      if (selectedPlayer) {
+        const updated = playerStats.find(p => p.normalizedName === selectedPlayer.normalizedName)
+        setSelectedPlayer(updated || null)
+      }
+    }
+  }, [filteredEntries])
 
   if (loading) {
     return (
@@ -55,6 +72,22 @@ export default function DriversPage() {
     <main className="min-h-screen bg-zinc-950 noise-texture pt-20 pb-32 md:pb-8">
       <Header />
       <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+          <div>
+            <h1 className="font-condensed text-4xl font-black uppercase tracking-tighter text-white">
+              Piloti
+            </h1>
+            <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest mt-1">
+              Schieramento Ufficiale {seasons.includes('all') ? 'All-Time' : seasons.sort().join(' + ')}
+            </p>
+          </div>
+          <SeasonFilter 
+            availableYears={availableYears}
+            selectedSeasons={seasons} 
+            onSeasonChange={setSeasons} 
+          />
+        </div>
+
         <AnimatePresence mode="wait">
           {!selectedPlayer ? (
             <motion.div
@@ -63,17 +96,6 @@ export default function DriversPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              <div className="flex items-center justify-between mb-12">
-                <div>
-                  <h1 className="font-condensed text-4xl font-black uppercase tracking-tighter text-white">
-                    Piloti
-                  </h1>
-                  <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest mt-1">
-                    Schieramento Ufficiale 2026
-                  </p>
-                </div>
-              </div>
-              
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {players.map((player, index) => (
                   <motion.div
@@ -143,7 +165,7 @@ export default function DriversPage() {
                 Torna alla griglia piloti
               </button>
               
-              <DriverProfile player={selectedPlayer} allPlayers={players} allEntries={allEntries} />
+              <DriverProfile player={selectedPlayer} allPlayers={players} allEntries={filteredEntries} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -224,7 +246,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
     const playlistEntries = allEntries.filter(e => e.elencoId === elencoId)
     if (playlistEntries.length === 0) return { data: [], players: [] }
     
-    const numRaces = playlistEntries[0].numGare
+    const numGare = playlistEntries[0].numGare
     const data = []
     const playersInElenco = playlistEntries.map(e => e.giocatore)
     
@@ -233,7 +255,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
       cumulativePoints[p] = 0
     })
     
-    for (let i = 0; i < numRaces; i++) {
+    for (let i = 0; i < numGare; i++) {
       const racePoint: { name: string; [key: string]: number | string } = { name: `G${i + 1}` }
       playlistEntries.forEach(entry => {
         cumulativePoints[entry.giocatore] += (entry.punteggiSingoleGare || [])[i] || 0
@@ -603,121 +625,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
         </div>
       </div>
 
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 shadow-xl">
-        <h3 className="font-condensed text-xl font-black uppercase tracking-tighter text-white mb-6">Analisi Elenchi Singoli</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-10 gap-2">
-          {player.raceScores.map((scores, index) => {
-            const total = scores.reduce((a, b) => a + b, 0)
-            const elencoId = player.elencoIds[index]
-            const isSelected = selectedElenco?.id === elencoId
-            return (
-              <div
-                key={index}
-                onClick={() => setSelectedElenco(isSelected ? null : { id: elencoId, index })}
-                className={`group flex flex-col items-center p-3 border rounded-lg transition-all cursor-pointer ${
-                  isSelected 
-                    ? 'bg-red-500/20 border-red-500 shadow-lg shadow-red-500/10' 
-                    : 'bg-zinc-800/20 border-zinc-800/50 hover:bg-zinc-800/50 hover:border-zinc-700'
-                }`}
-              >
-                <span className={`text-[9px] font-mono font-bold uppercase transition-colors ${
-                  isSelected ? 'text-red-400' : 'text-zinc-600 group-hover:text-zinc-400'
-                }`}>E{index + 1}</span>
-                <span className={`font-mono font-black text-lg transition-colors ${
-                  isSelected ? 'text-white' : 'text-white group-hover:text-red-500'
-                }`}>{total}</span>
-              </div>
-            )
-          })}
-        </div>
-
-        <AnimatePresence>
-          {selectedElenco && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mt-8 pt-8 border-t border-zinc-800 overflow-hidden"
-            >
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-0.5 bg-red-600/10 text-red-500 rounded text-[10px] font-mono font-bold uppercase tracking-widest border border-red-500/20">
-                      Telemetria Elenco {selectedElenco.index + 1}
-                    </span>
-                  </div>
-                  <h4 className="text-xl font-black uppercase tracking-tighter text-white leading-tight">
-                    {playlistInfo?.videoTitle || 'Analisi Evoluzione Gara'}
-                  </h4>
-                  {playlistInfo?.videoLink && (
-                    <a 
-                      href={playlistInfo.videoLink} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 mt-2 text-zinc-500 hover:text-red-500 transition-colors group text-[10px] font-mono font-bold uppercase tracking-widest"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                      Guarda il video integrale
-                    </a>
-                  )}
-                </div>
-                
-                <div className="flex flex-wrap gap-2">
-                  {multiEvolutionData.players.slice(0, 5).map(p => (
-                    <div key={p} className="flex items-center gap-1.5 px-2 py-1 bg-zinc-950/50 border border-zinc-800 rounded text-[9px] font-bold uppercase tracking-wider">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: getPlayerColor(p) }} />
-                      <span className="text-zinc-400">{p}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="h-[350px] w-full bg-zinc-950/30 rounded-xl border border-zinc-800/50 p-6">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={multiEvolutionData.data} margin={{ top: 10, right: 30, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                    <XAxis 
-                      dataKey="name" 
-                      stroke="#52525b" 
-                      fontSize={10} 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fill: '#71717a', fontFamily: 'monospace' }} 
-                    />
-                    <YAxis 
-                      stroke="#52525b" 
-                      fontSize={10} 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fill: '#71717a', fontFamily: 'monospace' }} 
-                    />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '8px', fontSize: '11px' }}
-                      labelStyle={{ color: '#a1a1aa', fontWeight: 'bold', marginBottom: '4px' }}
-                      itemStyle={{ padding: '2px 0' }}
-                    />
-                    {multiEvolutionData.players.map((pName) => (
-                      <Line
-                        key={pName}
-                        type="monotone"
-                        dataKey={pName}
-                        stroke={getPlayerColor(pName)}
-                        strokeWidth={pName === player.name ? 4 : 2}
-                        opacity={pName === player.name ? 1 : 0.4}
-                        dot={pName === player.name ? { r: 4, fill: getPlayerColor(pName) } : false}
-                        activeDot={{ r: 6, strokeWidth: 0 }}
-                        animationDuration={1000}
-                      />
-                    ))}
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Rivalries Section */}
+      {/* Rivalries Section (Moved Up) */}
       <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 shadow-xl">
         <div className="flex items-center justify-between mb-6">
           <h3 className="font-condensed text-xl font-black uppercase tracking-tighter text-white">Testa a Testa (H2H)</h3>
@@ -807,6 +715,122 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                     {isComparing ? 'Annulla Confronto' : 'Confronta'} <ExternalLink className="w-2.5 h-2.5" />
                   </button>
                 </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 shadow-xl">
+        <h3 className="font-condensed text-xl font-black uppercase tracking-tighter text-white mb-6">Analisi Elenchi Singoli</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-10 gap-2">
+          {player.raceScores.map((scores, index) => {
+            const total = scores.reduce((a, b) => a + b, 0)
+            const elencoId = player.elencoIds[index]
+            const isSelected = selectedElenco?.id === elencoId
+            
+            return (
+              <div key={index} className="contents">
+                <div
+                  onClick={() => setSelectedElenco(isSelected ? null : { id: elencoId, index })}
+                  className={`group flex flex-col items-center p-3 border rounded-lg transition-all cursor-pointer ${
+                    isSelected 
+                      ? 'bg-red-500/20 border-red-500 shadow-lg shadow-red-500/10' 
+                      : 'bg-zinc-800/20 border-zinc-800/50 hover:bg-zinc-800/50 hover:border-zinc-700'
+                  }`}
+                >
+                  <span className={`text-[9px] font-mono font-bold uppercase transition-colors ${
+                    isSelected ? 'text-red-400' : 'text-zinc-600 group-hover:text-zinc-400'
+                  }`}>E{index + 1}</span>
+                  <span className={`font-mono font-black text-lg transition-colors ${
+                    isSelected ? 'text-white' : 'text-white group-hover:text-red-500'
+                  }`}>{total}</span>
+                </div>
+
+                <AnimatePresence>
+                  {isSelected && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="col-span-full mt-4 mb-8 pt-8 border-t border-zinc-800 overflow-hidden"
+                    >
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="px-2 py-0.5 bg-red-600/10 text-red-500 rounded text-[10px] font-mono font-bold uppercase tracking-widest border border-red-500/20">
+                              Telemetria Elenco {selectedElenco.index + 1}
+                            </span>
+                          </div>
+                          <h4 className="text-xl font-black uppercase tracking-tighter text-white leading-tight">
+                            {playlistInfo?.videoTitle || 'Analisi Evoluzione Gara'}
+                          </h4>
+                          {playlistInfo?.videoLink && (
+                            <a 
+                              href={playlistInfo.videoLink} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 mt-2 text-zinc-500 hover:text-red-500 transition-colors group text-[10px] font-mono font-bold uppercase tracking-widest"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              Guarda il video integrale
+                            </a>
+                          )}
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2">
+                          {multiEvolutionData.players.slice(0, 5).map(p => (
+                            <div key={p} className="flex items-center gap-1.5 px-2 py-1 bg-zinc-950/50 border border-zinc-800 rounded text-[9px] font-bold uppercase tracking-wider">
+                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: getPlayerColor(p) }} />
+                              <span className="text-zinc-400">{p}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="h-[350px] w-full bg-zinc-950/30 rounded-xl border border-zinc-800/50 p-6">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={multiEvolutionData.data} margin={{ top: 10, right: 30, left: -20, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                            <XAxis 
+                              dataKey="name" 
+                              stroke="#52525b" 
+                              fontSize={10} 
+                              axisLine={false} 
+                              tickLine={false} 
+                              tick={{ fill: '#71717a', fontFamily: 'monospace' }} 
+                            />
+                            <YAxis 
+                              stroke="#52525b" 
+                              fontSize={10} 
+                              axisLine={false} 
+                              tickLine={false} 
+                              tick={{ fill: '#71717a', fontFamily: 'monospace' }} 
+                            />
+                            <Tooltip 
+                              contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '8px', fontSize: '11px' }}
+                              labelStyle={{ color: '#a1a1aa', fontWeight: 'bold', marginBottom: '4px' }}
+                              itemStyle={{ padding: '2px 0' }}
+                            />
+                            {multiEvolutionData.players.map((pName) => (
+                              <Line
+                                key={pName}
+                                type="monotone"
+                                dataKey={pName}
+                                stroke={getPlayerColor(pName)}
+                                strokeWidth={pName === player.name ? 4 : 2}
+                                opacity={pName === player.name ? 1 : 0.4}
+                                dot={pName === player.name ? { r: 4, fill: getPlayerColor(pName) } : false}
+                                activeDot={{ r: 6, strokeWidth: 0 }}
+                                animationDuration={1000}
+                              />
+                            ))}
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )
           })}

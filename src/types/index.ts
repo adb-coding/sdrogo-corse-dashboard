@@ -43,6 +43,7 @@ export interface RaceEntry {
   puntiTotali: number
   punteggiSingoleGare: number[]
   numGare: number
+  uploadDate?: string
 }
 
 export type SortKey = 'totalPoints' | 'avgPoints' | 'playlistsWon' | 'winRate' | 'playlistsPlayed'

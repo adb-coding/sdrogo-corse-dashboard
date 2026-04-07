@@ -42,6 +42,7 @@ export async function parseCSV(filePath: string): Promise<RaceEntry[]> {
           const numGare = parseInt(row.num_gare || '0', 10)
           const videoTitle = row.titolo?.trim() || ''
           const videoLink = row.link?.trim() || ''
+          const uploadDate = row.upload_date?.trim() || ''
           
           if (!isNaN(elencoId) && giocatore) {
             entries.push({
@@ -52,7 +53,8 @@ export async function parseCSV(filePath: string): Promise<RaceEntry[]> {
               punteggiSingoleGare: parseScores(row.punteggi_singole_gare || ''),
               numGare,
               videoTitle,
-              videoLink
+              videoLink,
+              uploadDate
             })
           }
         }
@@ -61,6 +63,31 @@ export async function parseCSV(filePath: string): Promise<RaceEntry[]> {
       },
       error: reject
     })
+  })
+}
+
+export function getAvailableYears(entries: RaceEntry[]): string[] {
+  const years = new Set<string>()
+  entries.forEach(entry => {
+    if (entry.uploadDate) {
+      const yearMatch = entry.uploadDate.match(/\d{4}/)
+      if (yearMatch) {
+        years.add(yearMatch[0])
+      }
+    }
+  })
+  return Array.from(years).sort((a, b) => b.localeCompare(a))
+}
+
+export function filterEntriesBySeason(entries: RaceEntry[], seasons: string[]): RaceEntry[] {
+  if (seasons.includes('all') || seasons.length === 0) return entries
+  
+  return entries.filter(entry => {
+    if (!entry.uploadDate) return false
+    const yearMatch = entry.uploadDate.match(/\d{4}/)
+    if (!yearMatch) return false
+    const year = yearMatch[0]
+    return seasons.includes(year)
   })
 }
 
@@ -124,8 +151,10 @@ export function processPlayerStats(entries: RaceEntry[]): PlayerStats[] {
     })
   }
   
-  return stats.sort((a, b) => b.totalPoints - a.totalPoints)
-}
+  return stats
+    .filter(p => p.playlistsPlayed >= 4)
+    .sort((a, b) => b.totalPoints - a.totalPoints)
+  }
 
 function isWinnerInPlaylist(elencoId: number, points: number, allEntries: RaceEntry[]): boolean {
   const playlistEntries = allEntries.filter(e => e.elencoId === elencoId)
