@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { BottomNav } from '@/components'
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
   title: 'Sdrogo Corse Dashboard 2026',
@@ -20,6 +21,7 @@ export default function RootLayout({
       <body className="bg-zinc-950 text-white min-h-screen">
         {children}
         <BottomNav />
+        <Analytics />
       </body>
     </html>
   )
