@@ -117,7 +117,7 @@ export function processPlayerStats(entries: RaceEntry[]): PlayerStats[] {
       isWinnerInPlaylist(e.elencoId, e.puntiTotali, entries)
     ).length
     
-    const winRate = ((playlistsWon / playlistsPlayed) * 100).toFixed(1) + '%'
+    const winRate = Number(((playlistsWon / playlistsPlayed) * 100).toFixed(1))
     
     const allScores = playerEntries.map(e => e.punteggiSingoleGare).flat()
     const form = getLast5PlaylistScores(playerEntries)

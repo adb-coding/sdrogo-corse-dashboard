@@ -31,11 +31,7 @@ export function Leaderboard({ players, onPlayerClick, highlightPlayer }: Leaderb
     const multiplier = sortAsc ? 1 : -1
     
     let comparison = 0
-    if (sortMetric === 'winRate') {
-      comparison = parseFloat(a.winRate) - parseFloat(b.winRate)
-    } else {
-      comparison = (a[sortMetric] as number) - (b[sortMetric] as number)
-    }
+    comparison = (a[sortMetric] as number) - (b[sortMetric] as number)
     
     return comparison * multiplier
   })
@@ -153,7 +149,7 @@ export function Leaderboard({ players, onPlayerClick, highlightPlayer }: Leaderb
                 {player.playlistsPlayed}
               </div>
               <div className="font-mono text-center flex items-center justify-center text-xs md:text-sm">
-                {player.winRate}
+                {player.winRate}%
               </div>
               <div className="font-mono text-center flex items-center justify-center text-xs md:text-sm text-red-400">
                 {player.dnfCount}

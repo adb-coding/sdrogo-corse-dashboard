@@ -77,6 +77,7 @@ export function TopThree({ players }: TopThreeProps) {
         {second && (
           <div className="flex flex-col items-center gap-3 md:gap-2">
             <PodiumCard 
+              key={`rank-2-${second.normalizedName}-${sortMetric}`}
               player={second} 
               rank={2} 
               color={getPlayerColor(second.normalizedName)}
@@ -92,6 +93,7 @@ export function TopThree({ players }: TopThreeProps) {
         {first && (
           <div className="flex flex-col items-center gap-3 md:gap-2 -mt-12">
             <PodiumCard 
+              key={`rank-1-${first.normalizedName}-${sortMetric}`}
               player={first} 
               rank={1} 
               color={getPlayerColor(first.normalizedName)}
@@ -111,6 +113,7 @@ export function TopThree({ players }: TopThreeProps) {
         {third && (
           <div className="flex flex-col items-center gap-3 md:gap-2">
             <PodiumCard 
+              key={`rank-3-${third.normalizedName}-${sortMetric}`}
               player={third} 
               rank={3} 
               color={getPlayerColor(third.normalizedName)}

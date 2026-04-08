@@ -5,7 +5,7 @@ export interface PlayerStats {
   avgPoints: number
   playlistsWon: number
   playlistsPlayed: number
-  winRate: string
+  winRate: number
   bestFinish: number
   worstFinish: number
   avgPosition: number
