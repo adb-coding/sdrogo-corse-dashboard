@@ -45,6 +45,12 @@ La versione mobile potrebbe avere bug grafici e non ossere ottimizata su tutti i
 
 La differenza principale sta nella creazione di una barra di navigazione per navigare tra le tre pagine. 
 
+### ⏳Classifica All-time
+
+Ho inserito la classifica All-time estrapolando i frame delle classifiche da alcuni dei video reperibili nelle playlist dei canali attraverso una rete neurale creata con PyTorch. I frame estratti sono poi stati sottoposti a un modello LLM per estrarre le classifiche in modo automatico, quindi inevitabilmente sono presenti degli errori in alcuni elenchi.
+
+Nei prossimi push fornirò maggiori dettagli nel framework e nel codice utilizzato per estrarre questi frame e il modello utilizzato.
+
 
 ## 📂Struttura del Progetto
 
