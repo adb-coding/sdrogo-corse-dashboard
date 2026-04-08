@@ -1,33 +1,46 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Header } from '@/components'
-import { parseCSV, getPlaylistData } from '@/lib/data'
+import { useEffect, useState, useMemo } from 'react'
+import { Header, SeasonFilter } from '@/components'
+import { parseCSV, getPlaylistData, filterEntriesBySeason, getAvailableYears } from '@/lib/data'
 import { getPlayerColor } from '@/lib/colors'
-import { PlaylistData } from '@/types'
+import { PlaylistData, RaceEntry } from '@/types'
 import { motion } from 'framer-motion'
 import { Trophy, User, ExternalLink, Youtube } from 'lucide-react'
 
 export default function PlaylistsPage() {
-  const [playlists, setPlaylists] = useState<PlaylistData[]>([])
+  const [seasons, setSeasons] = useState<string[]>(['all'])
+  const [allEntries, setAllEntries] = useState<RaceEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<number | null>(null)
 
   useEffect(() => {
     async function loadData() {
       try {
-        const entries = await parseCSV('/sdrogo_corse_stats.csv')
-        const playlistData = getPlaylistData(entries)
-        setPlaylists(playlistData)
+        const entries = await parseCSV('/sdrogo_corse_chronological.csv')
+        setAllEntries(entries)
       } catch (error) {
         console.error('Failed to load data:', error)
       } finally {
         setLoading(false)
       }
     }
-    
+
     loadData()
   }, [])
+
+  const availableYears = useMemo(() => getAvailableYears(allEntries), [allEntries])
+
+  const playlists = useMemo(() => {
+    const filtered = filterEntriesBySeason(allEntries, seasons)
+    return getPlaylistData(filtered)
+  }, [allEntries, seasons])
+
+  useEffect(() => {
+    if (selectedId !== null && !playlists.find(p => p.elencoId === selectedId)) {
+      setSelectedId(null)
+    }
+  }, [playlists, selectedId])
 
   if (loading) {
     return (
@@ -52,15 +65,27 @@ export default function PlaylistsPage() {
     <main className="min-h-screen bg-zinc-950 noise-texture pt-20 pb-32 md:pb-8">
       <Header />
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <h1 className="font-condensed text-3xl font-bold uppercase tracking-wider mb-8">
-          Elenchi
-        </h1>
-        
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+          <div>
+            <h1 className="font-condensed text-3xl font-bold uppercase tracking-wider text-white">
+              Elenchi
+            </h1>
+            <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest mt-1">
+              Database Completo Gare {seasons.includes('all') ? 'All-Time' : seasons.sort().join(' + ')}
+            </p>
+          </div>
+          <SeasonFilter 
+            availableYears={availableYears}
+            selectedSeasons={seasons} 
+            onSeasonChange={setSeasons} 
+          />
+        </div>
+
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {playlists.map((playlist, index) => {
             const winner = playlist.results[0]
             const isSelected = selectedId === playlist.elencoId
-            
+
             return (
               <motion.div
                 key={playlist.elencoId}
@@ -70,7 +95,7 @@ export default function PlaylistsPage() {
                 onClick={() => setSelectedId(isSelected ? null : playlist.elencoId)}
                 className={`p-4 rounded-lg border cursor-pointer transition-all ${
                   isSelected
-                    ? 'bg-zinc-800 border-racing-red'
+                    ? 'bg-zinc-800 border-red-600 shadow-lg shadow-red-600/10'
                     : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-600'
                 }`}
               >
@@ -81,7 +106,7 @@ export default function PlaylistsPage() {
                     <span className="text-xs text-zinc-500">{playlist.videoOwner}</span>
                   </div>
                 </div>
-                
+
                 <div 
                   className="font-condensed font-bold uppercase truncate"
                   style={{ color: getPlayerColor(winner.player) }}
@@ -89,8 +114,8 @@ export default function PlaylistsPage() {
                   <Trophy className="w-3 h-3 inline mr-1" />
                   {winner.player}
                 </div>
-                <div className="font-mono text-xl font-bold mt-1">{winner.totalPoints} pts</div>
-                
+                <div className="font-mono text-xl font-bold mt-1 text-white">{winner.totalPoints} pts</div>
+
                 <div className="flex gap-1 mt-2">
                   {playlist.results.slice(0, 5).map((r, i) => (
                     <div
@@ -162,7 +187,7 @@ export default function PlaylistsPage() {
                       className="flex items-center gap-4 p-3 rounded-lg bg-zinc-800/50 border-l-2"
                       style={{ borderLeftColor: getPlayerColor(result.player) }}
                     >
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-700 font-mono font-bold text-sm">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-700 font-mono font-bold text-sm text-white">
                         {index + 1}
                       </div>
                       <div className="flex-1">
@@ -173,7 +198,7 @@ export default function PlaylistsPage() {
                           {result.raceScores.join(' + ')}
                         </div>
                       </div>
-                      <div className="font-mono text-xl font-bold">{result.totalPoints}</div>
+                      <div className="font-mono text-xl font-bold text-white">{result.totalPoints}</div>
                     </motion.div>
                   ))}
                 </div>
@@ -185,14 +210,14 @@ export default function PlaylistsPage() {
                   {selectedPlaylist.results.map((result, index) => {
                     const maxPoints = selectedPlaylist.results[0]?.totalPoints || 100
                     const percentage = (result.totalPoints / maxPoints) * 100
-                    
+
                     return (
                       <div key={result.player} className="space-y-1">
                         <div className="flex justify-between text-sm">
                           <span style={{ color: getPlayerColor(result.player) }} className="font-condensed uppercase">
                             {result.player}
                           </span>
-                          <span className="font-mono">{result.totalPoints}</span>
+                          <span className="font-mono text-zinc-300">{result.totalPoints}</span>
                         </div>
                         <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
                           <motion.div

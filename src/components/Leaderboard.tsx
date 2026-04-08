@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { PlayerStats } from '@/types'
 import { getPlayerColor } from '@/lib/colors'
 import { motion } from 'framer-motion'
-type SortMetric = 'totalPoints' | 'avgPoints' | 'playlistsWon' | 'playlistsPlayed' | 'winRate' | 'avgPosition'
+type SortMetric = 'totalPoints' | 'avgPoints' | 'playlistsWon' | 'playlistsPlayed' | 'winRate' | 'dnfCount' | 'avgPosition'
 
 interface LeaderboardProps {
   players: PlayerStats[]
@@ -47,8 +47,8 @@ export function Leaderboard({ players, onPlayerClick, highlightPlayer }: Leaderb
 
   return (
     <div className="w-full overflow-x-auto custom-scrollbar">
-      <div className="min-w-[700px] md:min-w-[800px] px-2 md:px-0">
-        <div className="grid grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr_0.8fr_1fr_1fr] gap-2 md:gap-4 px-4 md:px-6 py-3 bg-zinc-900/50 border border-zinc-800 rounded-t-lg text-[10px] md:text-xs uppercase tracking-wider text-zinc-400 font-condensed">
+      <div className="min-w-[800px] md:min-w-[1000px] px-2 md:px-0">
+        <div className="grid grid-cols-[1.5fr_0.7fr_0.7fr_0.7fr_0.7fr_0.7fr_1fr_0.8fr] gap-2 md:gap-4 px-4 md:px-6 py-3 bg-zinc-900/50 border border-zinc-800 rounded-t-lg text-[10px] md:text-xs uppercase tracking-wider text-zinc-400 font-condensed">
           <button 
             onClick={() => handleSort('totalPoints')}
             className={`flex items-center gap-2 transition-colors hover:text-white ${sortMetric === 'totalPoints' ? 'text-white' : ''}`}
@@ -85,6 +85,13 @@ export function Leaderboard({ players, onPlayerClick, highlightPlayer }: Leaderb
             <span>Win %</span>
             <SortIcon metric="winRate" />
           </button>
+          <button 
+            onClick={() => handleSort('dnfCount')}
+            className={`flex items-center gap-2 transition-colors hover:text-white justify-center ${sortMetric === 'dnfCount' ? 'text-white' : ''}`}
+          >
+            <span>Non Arrivato</span>
+            <SortIcon metric="dnfCount" />
+          </button>
           <div className="flex items-center gap-2 justify-center">
             <TrendingUp className="w-3 h-3" />
             <span>Form</span>
@@ -106,7 +113,7 @@ export function Leaderboard({ players, onPlayerClick, highlightPlayer }: Leaderb
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               onClick={() => onPlayerClick?.(player)}
-              className={`grid grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr_0.8fr_1fr_1fr] gap-2 md:gap-4 px-4 md:px-6 py-4 driver-card cursor-pointer transition-all hover:bg-zinc-800/50 border-l-2 ${
+              className={`grid grid-cols-[1.5fr_0.7fr_0.7fr_0.7fr_0.7fr_0.7fr_1fr_0.8fr] gap-2 md:gap-4 px-4 md:px-6 py-4 driver-card cursor-pointer transition-all hover:bg-zinc-800/50 border-l-2 ${
                 highlightPlayer === player.normalizedName
                   ? 'bg-red-500/10 border-red-500'
                   : 'border-transparent'
@@ -147,6 +154,9 @@ export function Leaderboard({ players, onPlayerClick, highlightPlayer }: Leaderb
               </div>
               <div className="font-mono text-center flex items-center justify-center text-xs md:text-sm">
                 {player.winRate}
+              </div>
+              <div className="font-mono text-center flex items-center justify-center text-xs md:text-sm text-red-400">
+                {player.dnfCount}
               </div>
               <div className="flex items-center justify-center">
                 <FormIndicator form={player.form} />

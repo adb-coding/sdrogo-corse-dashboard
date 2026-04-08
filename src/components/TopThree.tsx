@@ -7,7 +7,7 @@ import { PlayerStats } from '@/types'
 import { getPlayerColor } from '@/lib/colors'
 import { motion, AnimatePresence } from 'framer-motion'
 
-type SortMetric = 'totalPoints' | 'avgPoints' | 'playlistsWon' | 'avgPosition'
+type SortMetric = 'totalPoints' | 'avgPoints' | 'playlistsWon' | 'avgPosition' | 'winRate'
 
 interface TopThreeProps {
   players: PlayerStats[]
@@ -25,7 +25,8 @@ const METRIC_CONFIG: Record<SortMetric, { label: string; unit: string; better: '
   totalPoints: { label: 'Punti Totali', unit: 'pt', better: 'higher' },
   avgPoints: { label: 'Media Punti', unit: 'pt', better: 'higher' },
   playlistsWon: { label: 'Vittorie', unit: 'W', better: 'higher' },
-  avgPosition: { label: 'Pos. Media', unit: '', better: 'lower' }
+  avgPosition: { label: 'Pos. Media', unit: '', better: 'lower' },
+  winRate: {label: '% Vittorie', unit: '%', better: 'higher'}
 }
 
 export function TopThree({ players }: TopThreeProps) {

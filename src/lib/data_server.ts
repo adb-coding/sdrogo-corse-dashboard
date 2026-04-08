@@ -23,7 +23,7 @@ const PLAYER_TAGS: Record<string, string[]> = {
 };
 
 export function parseCSV(): RaceEntry[] {
-  const text = readFileSync('public/sdrogo_corse_stats.csv', 'utf-8').replace(/^\uFEFF/, '')
+  const text = readFileSync('public/sdrogo_corse_chronological.csv', 'utf-8').replace(/^\uFEFF/, '')
   
   const result = Papa.parse(text, {
     header: true,
@@ -41,6 +41,7 @@ export function parseCSV(): RaceEntry[] {
     const numGare = parseInt(row.num_gare || '0', 10)
     const videoTitle = row.titolo?.trim() || ''
     const videoLink = row.link?.trim() || ''
+    const uploadDate = row.upload_date?.trim() || ''
     
     if (!isNaN(elencoId) && giocatore) {
       entries.push({
@@ -51,12 +52,27 @@ export function parseCSV(): RaceEntry[] {
         giocatore,
         puntiTotali,
         punteggiSingoleGare: parseScores(row.punteggi_singole_gare || ''),
-        numGare
+        numGare,
+        uploadDate
       })
     }
   }
   
   return entries
+}
+
+export function filterEntriesBySeason(entries: RaceEntry[], season: string): RaceEntry[] {
+  if (season === 'all') return entries
+  
+  const years = season.split('-').map(y => parseInt(y))
+  
+  return entries.filter(entry => {
+    if (!entry.uploadDate) return false
+    const yearMatch = entry.uploadDate.match(/\d{4}/)
+    if (!yearMatch) return false
+    const year = parseInt(yearMatch[0])
+    return years.includes(year)
+  })
 }
 
 export function processPlayerStats(entries: RaceEntry[]): PlayerStats[] {
@@ -79,7 +95,6 @@ export function processPlayerStats(entries: RaceEntry[]): PlayerStats[] {
     const totalRaces = playerEntries.reduce((sum, e) => sum + e.numGare, 0)
     const avgPoints = Number((totalPoints / playlistsPlayed).toFixed(2))
     
-    const playlistWinners = getPlaylistWinners(entries)
     const playlistsWon = playerEntries.filter(e => 
       isWinnerInPlaylist(e.elencoId, e.puntiTotali, entries)
     ).length
@@ -118,7 +133,9 @@ export function processPlayerStats(entries: RaceEntry[]): PlayerStats[] {
       })
       }
   
-  return stats.sort((a, b) => b.totalPoints - a.totalPoints)
+  return stats
+    .filter(p => p.playlistsPlayed >= 7)
+    .sort((a, b) => b.totalPoints - a.totalPoints)
 }
 
 function isWinnerInPlaylist(elencoId: number, points: number, allEntries: RaceEntry[]): boolean {
@@ -145,27 +162,6 @@ function getLast5PlaylistScores(playerEntries: RaceEntry[]): number[] {
   const sorted = [...playerEntries].sort((a, b) => a.elencoId - b.elencoId)
   const last5 = sorted.slice(-5)
   return last5.map(e => e.puntiTotali)
-}
-
-function getPlaylistWinners(entries: RaceEntry[]): Map<number, string> {
-  const winners = new Map<number, string>()
-  const playlistMap = new Map<number, RaceEntry[]>()
-  
-  for (const entry of entries) {
-    if (!playlistMap.has(entry.elencoId)) {
-      playlistMap.set(entry.elencoId, [])
-    }
-    playlistMap.get(entry.elencoId)!.push(entry)
-  }
-  
-  for (const [elencoId, playlistEntries] of playlistMap) {
-    const sorted = [...playlistEntries].sort((a, b) => b.puntiTotali - a.puntiTotali)
-    if (sorted.length > 0) {
-      winners.set(elencoId, sorted[0].giocatore)
-    }
-  }
-  
-  return winners
 }
 
 export function getPlaylistData(entries: RaceEntry[]): PlaylistData[] {
@@ -243,8 +239,11 @@ export function getHeadToHead(player1: string, player2: string, entries: RaceEnt
   return { player1Wins, player2Wins, ties }
 }
 
-export function getProcessedData() {
-  const entries = parseCSV()
+export function getProcessedData(season: string = 'all') {
+  let entries = parseCSV()
+  if (season !== 'all') {
+    entries = filterEntriesBySeason(entries, season)
+  }
   const players = processPlayerStats(entries)
   const playlists = getPlaylistData(entries)
   
