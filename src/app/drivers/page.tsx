@@ -27,7 +27,7 @@ export default function DriversPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const entries = await parseCSV('/sdrogo_corse_final.csv')
+        const entries = await parseCSV('/sdrogo_corse_chronological.csv')
         setAllEntries(entries)
         const playerStats = processPlayerStats(entries)
         setPlayers(playerStats)

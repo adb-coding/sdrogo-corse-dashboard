@@ -23,7 +23,7 @@ const PLAYER_TAGS: Record<string, string[]> = {
 };
 
 export function parseCSV(): RaceEntry[] {
-  const text = readFileSync('public/sdrogo_corse_final.csv', 'utf-8').replace(/^\uFEFF/, '')
+  const text = readFileSync('public/sdrogo_corse_chronological.csv', 'utf-8').replace(/^\uFEFF/, '')
   
   const result = Papa.parse(text, {
     header: true,
