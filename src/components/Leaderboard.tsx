@@ -120,7 +120,7 @@ export function Leaderboard({ players, onPlayerClick, highlightPlayer }: Leaderb
                 <div className="flex items-center gap-2 md:gap-3 min-w-0 overflow-hidden">
                   <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0">
                     <Image 
-                      src={`${player.images[0] || '/assets/marza.png'}`} 
+                      src={`${player.images[0] || '/assets/default_avatar.svg'}`}
                       alt={player.normalizedName}
                       fill
                       className="rounded-full object-cover border border-zinc-700 shadow-lg"

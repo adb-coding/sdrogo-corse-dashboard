@@ -29,7 +29,8 @@ export default function DriversPage() {
       try {
         const entries = await parseCSV('/sdrogo_corse_chronological.csv')
         setAllEntries(entries)
-        const playerStats = processPlayerStats(entries)
+        const minPlaylists = seasons.includes('all') ? 7 : 0
+        const playerStats = processPlayerStats(entries, minPlaylists)
         setPlayers(playerStats)
       } catch (error) {
         console.error('Failed to load data:', error)
@@ -43,7 +44,8 @@ export default function DriversPage() {
 
   useEffect(() => {
     if (allEntries.length > 0) {
-      const playerStats = processPlayerStats(filteredEntries)
+      const minPlaylists = seasons.includes('all') ? 7 : 0
+      const playerStats = processPlayerStats(filteredEntries, minPlaylists)
       setPlayers(playerStats)
       
       if (selectedPlayer) {
@@ -111,7 +113,7 @@ export default function DriversPage() {
                       <div className="relative">
                         <div className="absolute inset-0 rounded-full blur-lg opacity-20 transition-opacity group-hover:opacity-40" style={{ backgroundColor: getPlayerColor(player.normalizedName) }} />
                         <Image 
-                          src={player.images[0] || '/assets/marza.png'}
+                          src={player.images[0] || '/assets/default_avatar.svg'}
                           alt={player.normalizedName}
                           width={120}
                           height={120}
@@ -364,7 +366,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
         <div className="relative">
           <div className="absolute inset-0 rounded-full blur-3xl opacity-30" style={{ backgroundColor: playerColor }} />
           <Image 
-            src={player.images[0] || '/assets/marza.png'}
+            src={player.images[0] || '/assets/default_avatar.svg'}
             alt={player.normalizedName}
             width={200}
             height={200}
@@ -537,7 +539,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                               >
                                 <div className="flex items-center gap-3">
                                   <Image 
-                                    src={rival.images[0] || '/assets/marza.png'}
+                                    src={rival.images[0] || '/assets/default_avatar.svg'}
                                     alt={rival.normalizedName}
                                     width={24}
                                     height={24}
@@ -653,7 +655,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                     <div className="relative">
                       <div className="absolute inset-0 rounded-full blur-md opacity-20" style={{ backgroundColor: rivalColor }} />
                       <Image 
-                        src={rivalry.rival.images[0] || '/assets/marza.png'}
+                        src={rivalry.rival.images[0] || '/assets/default_avatar.svg'}
                         alt={rivalry.rival.normalizedName}
                         width={40}
                         height={40}

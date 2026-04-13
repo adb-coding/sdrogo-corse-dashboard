@@ -75,7 +75,7 @@ export function filterEntriesBySeason(entries: RaceEntry[], season: string): Rac
   })
 }
 
-export function processPlayerStats(entries: RaceEntry[]): PlayerStats[] {
+export function processPlayerStats(entries: RaceEntry[], minPlaylists: number = 0): PlayerStats[] {
   const playerMap = new Map<string, RaceEntry[]>()
   
   for (const entry of entries) {
@@ -134,7 +134,7 @@ export function processPlayerStats(entries: RaceEntry[]): PlayerStats[] {
       }
   
   return stats
-    .filter(p => p.playlistsPlayed >= 7)
+    .filter(p => p.playlistsPlayed >= minPlaylists)
     .sort((a, b) => b.totalPoints - a.totalPoints)
 }
 
@@ -244,7 +244,8 @@ export function getProcessedData(season: string = 'all') {
   if (season !== 'all') {
     entries = filterEntriesBySeason(entries, season)
   }
-  const players = processPlayerStats(entries)
+  const minPlaylists = season === 'all' ? 7 : 0
+  const players = processPlayerStats(entries, minPlaylists)
   const playlists = getPlaylistData(entries)
   
   return { players, playlists, entries }

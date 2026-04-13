@@ -24,8 +24,9 @@ export default function Home() {
 
   const filteredData = useMemo(() => {
     const filtered = filterEntriesBySeason(allEntries, seasons)
+    const minPlaylists = seasons.includes('all') ? 7 : 0
     return {
-      players: processPlayerStats(filtered),
+      players: processPlayerStats(filtered, minPlaylists),
       playlists: getPlaylistData(filtered)
     }
   }, [seasons, allEntries])

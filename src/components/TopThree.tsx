@@ -223,7 +223,7 @@ function PodiumCard({ player, rank, color, isWinner, metric }: PodiumCardProps) 
       <div className="relative mb-3 md:mb-4">
         <div className="absolute inset-0 rounded-full blur-xl opacity-20" style={{ backgroundColor: color }} />
         <Image 
-          src={`${player.images[0] || '/assets/marza.png'}`} 
+          src={`${player.images[0] || '/assets/default_avatar.svg'}`}
           alt={player.normalizedName}
           width={112}
           height={112}
