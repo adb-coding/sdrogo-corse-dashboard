@@ -409,9 +409,6 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                 {t}
               </span>
             ))}
-            <span className="px-3 py-1 bg-red-600/10 text-red-500 rounded text-[10px] font-mono font-bold uppercase tracking-widest border border-red-500/20">
-              Season 2026
-            </span>
           </div>
         </div>
       </div>

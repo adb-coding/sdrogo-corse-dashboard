@@ -15,11 +15,11 @@ const PLAYER_TAGS: Record<string, string[]> = {
   Marza: ['Marzone'],
   Delux: ['Addobboland'],
   Dread: ['Dreddonico Bobby'],
-  Gabbo: ['GabboDiSqualo'],
-  Masseo: ['Ghesboro'],
+  Gabbo: ['Gabbo Di Smerdaland'],
+  Masseo: ['Ghesboro DC'],
   Rohn: ['Just Fucking Just'],
   Mollu: ['Non Pippo Più'],
-  JTaz: ['Titti2']
+  JTaz: ['Zugu Titti ']
 };
 
 export async function parseCSV(filePath: string): Promise<RaceEntry[]> {

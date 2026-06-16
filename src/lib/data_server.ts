@@ -15,11 +15,11 @@ const getPlayerImage = (normalizedName: string): string | null => {
 const PLAYER_TAGS: Record<string, string[]> = {
   Marza: ['Marzone'],
   Dread: ['Dreddonico Bobby'],
-  Gabbo: ['GabboDiSqualo'],
-  Masseo: ['Ghesboro'],
+  Gabbo: ['Gabbo Di Smerdaland'],
+  Masseo: ['Ghesboro DC'],
   Rohn: ['Just Fucking Just'],
   Mollu: ['Non Pippo Più'],
-  JTaz: ['Titti2']
+  JTaz: ['Zugu Titti']
 };
 
 export function parseCSV(): RaceEntry[] {
