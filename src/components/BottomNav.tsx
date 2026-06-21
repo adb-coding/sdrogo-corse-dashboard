@@ -4,14 +4,16 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, Users, Trophy } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useGameMode } from '@/lib/game-mode'
 
 export function BottomNav() {
   const pathname = usePathname()
+  const { config } = useGameMode()
 
   const navItems = [
-    { href: '/', icon: <Home className="w-5 h-5" />, label: 'Classifica' },
-    { href: '/playlists', icon: <Trophy className="w-5 h-5" />, label: 'Elenchi' },
-    { href: '/drivers', icon: <Users className="w-5 h-5" />, label: 'Piloti' },
+    { href: '/', icon: <Home className="w-5 h-5" />, label: config.nav.home },
+    { href: '/playlists', icon: <Trophy className="w-5 h-5" />, label: config.nav.playlists },
+    { href: '/drivers', icon: <Users className="w-5 h-5" />, label: config.nav.drivers },
   ]
 
   return (
@@ -26,7 +28,7 @@ export function BottomNav() {
               href={item.href}
               className="relative flex flex-col items-center gap-1 px-4 py-2"
             >
-              <div className={`transition-all duration-300 ${isActive ? 'text-red-500 scale-110' : 'text-zinc-500 hover:text-zinc-300'}`}>
+              <div className={`transition-all duration-300 ${isActive ? 'text-accent scale-110' : 'text-zinc-500 hover:text-zinc-300'}`}>
                 {item.icon}
               </div>
               <span className={`text-[10px] font-condensed font-bold uppercase tracking-widest transition-colors ${isActive ? 'text-white' : 'text-zinc-500'}`}>
@@ -34,9 +36,9 @@ export function BottomNav() {
               </span>
               
               {isActive && (
-                <motion.div 
+                <motion.div
                   layoutId="bottomNavTab"
-                  className="absolute -bottom-1 w-1 h-1 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.8)]"
+                  className="absolute -bottom-1 w-1 h-1 bg-accent rounded-full shadow-[0_0_8px_rgb(var(--accent)_/_0.8)]"
                 />
               )}
             </Link>

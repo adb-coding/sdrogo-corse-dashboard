@@ -10,8 +10,18 @@
   --card: #18181b;
   --card-foreground: #ffffff;
   --border: #27272a;
-  --accent: #ef4444;
-  --accent-secondary: #f97316;
+  /* Accents are stored as space-separated RGB channels so Tailwind opacity
+     modifiers (bg-accent/10) and rgb(var(--accent) / a) overrides both work. */
+  --accent: 239 68 68;
+  --accent-secondary: 249 115 22;
+}
+
+/* Racing (default) keeps the red/orange accents above.
+   Golf re-themes to green/cyan; all .neon/.rank/.driver utilities below read
+   the vars, so the whole UI re-skins from this single switch. */
+[data-theme='golf'] {
+  --accent: 34 197 94;
+  --accent-secondary: 6 182 212;
 }
 
 * {
@@ -41,15 +51,15 @@ body {
 }
 
 .neon-glow-red {
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.5),
-              0 0 40px rgba(239, 68, 68, 0.3),
-              0 0 60px rgba(239, 68, 68, 0.1);
+  box-shadow: 0 0 20px rgb(var(--accent) / 0.5),
+              0 0 40px rgb(var(--accent) / 0.3),
+              0 0 60px rgb(var(--accent) / 0.1);
 }
 
 .neon-glow-orange {
-  box-shadow: 0 0 20px rgba(249, 115, 22, 0.5),
-              0 0 40px rgba(249, 115, 22, 0.3),
-              0 0 60px rgba(249, 115, 22, 0.1);
+  box-shadow: 0 0 20px rgb(var(--accent-secondary) / 0.5),
+              0 0 40px rgb(var(--accent-secondary) / 0.3),
+              0 0 60px rgb(var(--accent-secondary) / 0.1);
 }
 
 .glass-effect {
@@ -77,12 +87,12 @@ body {
 
 .driver-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 30px rgb(var(--accent) / 0.2);
 }
 
 .rank-1 {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(249, 115, 22, 0.1) 100%);
-  border-color: rgba(239, 68, 68, 0.5);
+  background: linear-gradient(135deg, rgb(var(--accent) / 0.1) 0%, rgb(var(--accent-secondary) / 0.1) 100%);
+  border-color: rgb(var(--accent) / 0.5);
 }
 
 .rank-2 {

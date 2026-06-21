@@ -60,7 +60,7 @@ export function PlaylistViewer({ playlists }: PlaylistViewerProps) {
               href={selected.videoLink} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="group flex items-center gap-3 p-2.5 bg-zinc-950/40 border border-zinc-800 rounded-lg hover:border-red-500/50 transition-all shadow-md max-w-xs md:max-w-sm"
+              className="group flex items-center gap-3 p-2.5 bg-zinc-950/40 border border-zinc-800 rounded-lg hover:border-accent/50 transition-all shadow-md max-w-xs md:max-w-sm"
             >
               <div className="p-1.5 bg-red-600/10 rounded-full group-hover:bg-red-600/20 transition-colors">
                 <Youtube className="w-4 h-4 text-red-500" />
@@ -239,7 +239,7 @@ export function PlaylistViewer({ playlists }: PlaylistViewerProps) {
               onClick={() => setSelectedIndex(index)}
               className={`min-w-[32px] h-8 rounded text-[10px] font-bold font-mono transition-all ${
                 index === selectedIndex
-                  ? 'bg-red-500 text-white shadow-lg shadow-red-500/20'
+                  ? 'bg-accent text-white shadow-lg shadow-accent/20'
                   : 'bg-zinc-800 text-zinc-500 hover:bg-zinc-700 border border-zinc-700/50'
               }`}
             >

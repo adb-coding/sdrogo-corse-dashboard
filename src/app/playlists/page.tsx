@@ -7,8 +7,10 @@ import { getPlayerColor } from '@/lib/colors'
 import { PlaylistData, RaceEntry } from '@/types'
 import { motion } from 'framer-motion'
 import { Trophy, User, ExternalLink, Youtube } from 'lucide-react'
+import { useGameMode } from '@/lib/game-mode'
 
 export default function PlaylistsPage() {
+  const { config } = useGameMode()
   const [seasons, setSeasons] = useState<string[]>(['all'])
   const [allEntries, setAllEntries] = useState<RaceEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -17,7 +19,8 @@ export default function PlaylistsPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const entries = await parseCSV('/sdrogo_corse_chronological.csv')
+        setLoading(true)
+        const entries = await parseCSV(config.csvPath)
         setAllEntries(entries)
       } catch (error) {
         console.error('Failed to load data:', error)
@@ -27,14 +30,14 @@ export default function PlaylistsPage() {
     }
 
     loadData()
-  }, [])
+  }, [config.csvPath])
 
   const availableYears = useMemo(() => getAvailableYears(allEntries), [allEntries])
 
   const playlists = useMemo(() => {
     const filtered = filterEntriesBySeason(allEntries, seasons)
-    return getPlaylistData(filtered)
-  }, [allEntries, seasons])
+    return getPlaylistData(filtered, config.lowerIsBetter)
+  }, [allEntries, seasons, config.lowerIsBetter])
 
   useEffect(() => {
     if (selectedId !== null && !playlists.find(p => p.elencoId === selectedId)) {
@@ -91,7 +94,7 @@ export default function PlaylistsPage() {
                   onClick={() => setSelectedId(isSelected ? null : playlist.elencoId)}
                   className={`p-4 rounded-lg border cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-zinc-800 border-red-600 shadow-lg shadow-red-600/10'
+                      ? 'bg-zinc-800 border-accent shadow-lg shadow-accent/10'
                       : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-600'
                   }`}
                 >
@@ -110,7 +113,7 @@ export default function PlaylistsPage() {
                     <Trophy className="w-3 h-3 inline mr-1" />
                     {winner.player}
                   </div>
-                  <div className="font-mono text-xl font-bold mt-1 text-white">{winner.totalPoints} pts</div>
+                  <div className="font-mono text-xl font-bold mt-1 text-white">{winner.totalPoints} {config.lowerIsBetter ? 'colpi' : 'pts'}</div>
 
                   <div className="flex gap-1 mt-2">
                     {playlist.results.slice(0, 5).map((r, i) => (
@@ -237,7 +240,7 @@ export default function PlaylistsPage() {
       <footer className="border-t border-zinc-800 mt-16 py-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-zinc-500 text-[10px] font-mono uppercase tracking-[0.3em]">
-            Sdrogo Corse Dashboard 2026 &copy; Tutti i video e i contenuti sono di proprietà dei rispettivi creatori
+            {config.title} Dashboard 2026 &copy; Tutti i video e i contenuti sono di proprietà dei rispettivi creatori
           </p>
           <p className="text-zinc-500 text-[10px] font-mono tracking-[0.3em]">
           Si ringrazia @antobeviz per la creazione delle statistiche

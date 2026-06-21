@@ -80,7 +80,7 @@ export function SeasonFilter({ availableYears, selectedSeasons, onSeasonChange }
                   setIsOpen(false)
                 }}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-[10px] font-mono font-bold uppercase tracking-widest transition-colors ${
-                  isAllSelected ? 'bg-red-600 text-white' : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'
+                  isAllSelected ? 'bg-accent text-white' : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'
                 }`}
               >
                 All-Time
@@ -100,7 +100,7 @@ export function SeasonFilter({ availableYears, selectedSeasons, onSeasonChange }
                     }`}
                   >
                     {year}
-                    {isSelected && <Check className="w-3 h-3 text-red-500" />}
+                    {isSelected && <Check className="w-3 h-3 text-accent" />}
                   </button>
                 )
               })}

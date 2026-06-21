@@ -1,13 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Trophy, ChevronDown, Check } from 'lucide-react'
 import Image from 'next/image'
 import { PlayerStats } from '@/types'
 import { getPlayerColor } from '@/lib/colors'
+import { useGameMode } from '@/lib/game-mode'
 import { motion, AnimatePresence } from 'framer-motion'
 
 type SortMetric = 'totalPoints' | 'avgPoints' | 'playlistsWon' | 'avgPosition' | 'winRate'
+
+// Metrics that follow the game's scoring direction (low strokes win in golf).
+const SCORE_METRICS: SortMetric[] = ['totalPoints', 'avgPoints']
 
 interface TopThreeProps {
   players: PlayerStats[]
@@ -30,18 +34,26 @@ const METRIC_CONFIG: Record<SortMetric, { label: string; unit: string; better: '
 }
 
 export function TopThree({ players }: TopThreeProps) {
-  const [sortMetric, setSortMetric] = useState<SortMetric>('totalPoints')
+  const { config } = useGameMode()
+  // Golf's headline metric is average strokes; racing's is total points.
+  const defaultMetric: SortMetric = config.lowerIsBetter ? 'avgPoints' : 'totalPoints'
+  const [sortMetric, setSortMetric] = useState<SortMetric>(defaultMetric)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  
+
+  useEffect(() => {
+    setSortMetric(defaultMetric)
+  }, [defaultMetric])
+
   const sortedPlayers = [...players].sort((a, b) => {
     const aValue = a[sortMetric] as number
     const bValue = b[sortMetric] as number
-    
-    if (METRIC_CONFIG[sortMetric].better === 'higher') {
-      return bValue - aValue
-    } else {
-      return aValue - bValue
-    }
+
+    // In golf, score metrics rank ascending (fewest strokes first).
+    const lowerWins =
+      METRIC_CONFIG[sortMetric].better === 'lower' ||
+      (config.lowerIsBetter && SCORE_METRICS.includes(sortMetric))
+
+    return lowerWins ? aValue - bValue : bValue - aValue
   })
   
   const top3 = sortedPlayers.slice(0, 3)
@@ -53,8 +65,8 @@ export function TopThree({ players }: TopThreeProps) {
     <div className="w-full max-w-4xl mx-auto mb-12">
       <div className="flex flex-col md:flex-row items-center justify-between mb-16 md:mb-12 gap-6">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-red-600/20 rounded-lg flex items-center justify-center border border-red-500/30 neon-glow-red">
-            <Trophy className="w-6 h-6 text-red-500" />
+          <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center border border-accent/30 neon-glow-red">
+            <Trophy className="w-6 h-6 text-accent" />
           </div>
           <div>
             <h2 className="font-condensed text-3xl font-black uppercase tracking-tighter text-white">Podio</h2>
@@ -100,10 +112,10 @@ export function TopThree({ players }: TopThreeProps) {
               isWinner
               metric={sortMetric}
             />
-            <div className="w-28 md:w-40 h-32 md:h-40 bg-gradient-to-t from-red-950/40 to-red-900/20 border-x border-t border-red-900/30 rounded-t-lg flex items-end justify-center pb-4 relative overflow-hidden neon-glow-red">
-              <div className="absolute inset-0 bg-red-500/5 opacity-20" />
+            <div className="w-28 md:w-40 h-32 md:h-40 bg-gradient-to-t from-accent/20 to-accent/10 border-x border-t border-accent/30 rounded-t-lg flex items-end justify-center pb-4 relative overflow-hidden neon-glow-red">
+              <div className="absolute inset-0 bg-accent/5 opacity-20" />
               <div className="flex flex-col items-center relative z-10">
-                <Trophy className="w-6 h-6 md:w-8 md:h-8 text-orange-500 mb-2 drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]" />
+                <Trophy className="w-6 h-6 md:w-8 md:h-8 text-accentSecondary mb-2 drop-shadow-[0_0_10px_rgb(var(--accent-secondary)_/_0.5)]" />
                 <span className="font-mono text-5xl md:text-6xl font-black text-white">1</span>
               </div>
             </div>
@@ -187,7 +199,7 @@ function MetricSelector({
                     setIsDropdownOpen(false)
                   }}
                   className={`w-full flex items-center justify-between px-4 py-3 text-left hover:bg-zinc-800 transition-colors ${
-                    sortMetric === metric ? 'bg-red-500/10 text-red-500' : 'text-zinc-400'
+                    sortMetric === metric ? 'bg-accent/10 text-accent' : 'text-zinc-400'
                   }`}
                 >
                   <span className="text-xs font-bold uppercase tracking-wider">
@@ -214,8 +226,8 @@ function PodiumCard({ player, rank, color, isWinner, metric }: PodiumCardProps) 
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: rank * 0.1 }}
       className={`w-[110px] md:w-44 p-3 md:p-4 rounded-xl border transition-all duration-500 relative flex flex-col items-center ${
-        isWinner 
-          ? 'bg-zinc-900/90 border-red-500/50 shadow-[0_0_40px_rgba(239,68,68,0.2)] z-20' 
+        isWinner
+          ? 'bg-zinc-900/90 border-accent/50 shadow-[0_0_40px_rgb(var(--accent)_/_0.2)] z-20'
           : 'bg-zinc-900/60 border-zinc-800 z-10'
       }`}
       style={{ borderBottomColor: color, borderBottomWidth: '5px' }}
@@ -230,7 +242,7 @@ function PodiumCard({ player, rank, color, isWinner, metric }: PodiumCardProps) 
           className="w-16 h-16 md:w-28 md:h-28 rounded-full object-cover border-4 border-zinc-800 relative z-10 shadow-2xl"
         />
         {isWinner && (
-          <div className="absolute -top-1 -right-1 bg-orange-500 rounded-full p-1 shadow-lg border-2 border-zinc-900 z-20">
+          <div className="absolute -top-1 -right-1 bg-accentSecondary rounded-full p-1 shadow-lg border-2 border-zinc-900 z-20">
             <Trophy className="w-3 h-3 md:w-4 md:h-4 text-white" />
           </div>
         )}

@@ -1,12 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Trophy, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react'
 import Image from 'next/image'
 import { PlayerStats } from '@/types'
 import { getPlayerColor } from '@/lib/colors'
+import { useGameMode } from '@/lib/game-mode'
 import { motion } from 'framer-motion'
 type SortMetric = 'totalPoints' | 'avgPoints' | 'playlistsWon' | 'playlistsPlayed' | 'winRate' | 'dnfCount' | 'avgPosition'
+
+// Metrics that follow the game's scoring direction (low strokes win in golf).
+const SCORE_METRICS: SortMetric[] = ['totalPoints', 'avgPoints']
 
 interface LeaderboardProps {
   players: PlayerStats[]
@@ -15,8 +19,15 @@ interface LeaderboardProps {
 }
 
 export function Leaderboard({ players, onPlayerClick, highlightPlayer }: LeaderboardProps) {
-  const [sortMetric, setSortMetric] = useState<SortMetric>('totalPoints')
+  const { config } = useGameMode()
+  // Golf's headline metric is average strokes; racing's is total points.
+  const defaultMetric: SortMetric = config.lowerIsBetter ? 'avgPoints' : 'totalPoints'
+  const [sortMetric, setSortMetric] = useState<SortMetric>(defaultMetric)
   const [sortAsc, setSortAsc] = useState(false)
+
+  useEffect(() => {
+    setSortMetric(defaultMetric)
+  }, [defaultMetric])
 
   const handleSort = (metric: SortMetric) => {
     if (sortMetric === metric) {
@@ -28,17 +39,20 @@ export function Leaderboard({ players, onPlayerClick, highlightPlayer }: Leaderb
   }
 
   const sortedPlayers = [...players].sort((a, b) => {
-    const multiplier = sortAsc ? 1 : -1
-    
-    let comparison = 0
-    comparison = (a[sortMetric] as number) - (b[sortMetric] as number)
-    
+    let multiplier = sortAsc ? 1 : -1
+    // In golf, score metrics rank ascending by default (fewest strokes = best).
+    if (config.lowerIsBetter && SCORE_METRICS.includes(sortMetric)) {
+      multiplier = -multiplier
+    }
+
+    const comparison = (a[sortMetric] as number) - (b[sortMetric] as number)
+
     return comparison * multiplier
   })
 
   const SortIcon = ({ metric }: { metric: SortMetric }) => {
     if (sortMetric !== metric) return <ChevronDown className="w-3 h-3 opacity-20" />
-    return sortAsc ? <ChevronUp className="w-3 h-3 text-red-500" /> : <ChevronDown className="w-3 h-3 text-red-500" />
+    return sortAsc ? <ChevronUp className="w-3 h-3 text-accent" /> : <ChevronDown className="w-3 h-3 text-accent" />
   }
 
   return (
@@ -49,7 +63,7 @@ export function Leaderboard({ players, onPlayerClick, highlightPlayer }: Leaderb
             onClick={() => handleSort('totalPoints')}
             className={`flex items-center gap-2 transition-colors hover:text-white ${sortMetric === 'totalPoints' ? 'text-white' : ''}`}
           >
-            <span className="text-left flex-1">Pilota / Punti</span>
+            <span className="text-left flex-1">{config.playerSingular} / {config.scoreLabel}</span>
             <SortIcon metric="totalPoints" />
           </button>
           <button 
@@ -111,7 +125,7 @@ export function Leaderboard({ players, onPlayerClick, highlightPlayer }: Leaderb
               onClick={() => onPlayerClick?.(player)}
               className={`grid grid-cols-[1.5fr_0.7fr_0.7fr_0.7fr_0.7fr_0.7fr_1fr_0.8fr] gap-2 md:gap-4 px-4 md:px-6 py-4 driver-card cursor-pointer transition-all hover:bg-zinc-800/50 border-l-2 ${
                 highlightPlayer === player.normalizedName
-                  ? 'bg-red-500/10 border-red-500'
+                  ? 'bg-accent/10 border-accent'
                   : 'border-transparent'
               }`}
             >
@@ -134,7 +148,7 @@ export function Leaderboard({ players, onPlayerClick, highlightPlayer }: Leaderb
                       {player.normalizedName}
                     </span>
                     <span className="font-mono font-black text-xs md:text-sm text-white md:ml-auto bg-zinc-800 md:bg-transparent px-1.5 py-0.5 rounded md:rounded-none w-fit">
-                      {player.totalPoints} <span className="text-[8px] text-zinc-500 font-bold md:hidden">PTS</span>
+                      {player.totalPoints} <span className="text-[8px] text-zinc-500 font-bold md:hidden uppercase">{config.scoreLabel}</span>
                     </span>
                   </div>
                 </div>

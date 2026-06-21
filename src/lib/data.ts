@@ -1,6 +1,7 @@
 import Papa from 'papaparse'
 import { RaceEntry, PlayerStats, PlaylistData, PlaylistResult } from '@/types'
 import { normalizePlayerName, getPlayerImage as getPlayerImageFromColors } from './colors'
+import { compareScores } from './game-config'
 
 const parseScores = (scoreString: string): number[] => {
   if (!scoreString) return []
@@ -91,7 +92,7 @@ export function filterEntriesBySeason(entries: RaceEntry[], seasons: string[]): 
   })
 }
 
-export function processPlayerStats(entries: RaceEntry[], minPlaylists: number = 0): PlayerStats[] {
+export function processPlayerStats(entries: RaceEntry[], minPlaylists: number = 0, lowerIsBetter: boolean = false): PlayerStats[] {
   const playerMap = new Map<string, RaceEntry[]>()
   
   for (const entry of entries) {
@@ -112,9 +113,8 @@ export function processPlayerStats(entries: RaceEntry[], minPlaylists: number = 
     const totalRaces = playerEntries.reduce((sum, e) => sum + e.numGare, 0)
     const avgPoints = Number((totalPoints / playlistsPlayed).toFixed(2))
     
-    const playlistWinners = getPlaylistWinners(entries)
-    const playlistsWon = playerEntries.filter(e => 
-      isWinnerInPlaylist(e.elencoId, e.puntiTotali, entries)
+    const playlistsWon = playerEntries.filter(e =>
+      isWinnerInPlaylist(e.elencoId, e.puntiTotali, entries, lowerIsBetter)
     ).length
     
     const winRate = Number(((playlistsWon / playlistsPlayed) * 100).toFixed(1))
@@ -123,7 +123,7 @@ export function processPlayerStats(entries: RaceEntry[], minPlaylists: number = 
     const form = getLast5PlaylistScores(playerEntries)
     const dnfCount = allScores.filter(score => score === 0).length
     
-    const positions = calculatePositions(playerEntries, entries)
+    const positions = calculatePositions(playerEntries, entries, lowerIsBetter)
     const avgPosition = Number((positions.reduce((a, b) => a + b, 0) / positions.length).toFixed(2))
     
     const playerImage = getPlayerImage(name)
@@ -151,27 +151,34 @@ export function processPlayerStats(entries: RaceEntry[], minPlaylists: number = 
     })
   }
   
+  // Racing rewards accumulation (rank by total points). Golf is per-round skill:
+  // ranking by total strokes would punish playing more rounds, so rank by average.
   return stats
     .filter(p => p.playlistsPlayed >= minPlaylists)
-    .sort((a, b) => b.totalPoints - a.totalPoints)
+    .sort((a, b) =>
+      lowerIsBetter
+        ? compareScores(a.avgPoints, b.avgPoints, true)
+        : compareScores(a.totalPoints, b.totalPoints, false)
+    )
   }
 
-function isWinnerInPlaylist(elencoId: number, points: number, allEntries: RaceEntry[]): boolean {
+function isWinnerInPlaylist(elencoId: number, points: number, allEntries: RaceEntry[], lowerIsBetter: boolean = false): boolean {
   const playlistEntries = allEntries.filter(e => e.elencoId === elencoId)
-  const maxPoints = Math.max(...playlistEntries.map(e => e.puntiTotali))
-  return points === maxPoints
+  const scores = playlistEntries.map(e => e.puntiTotali)
+  const bestPoints = lowerIsBetter ? Math.min(...scores) : Math.max(...scores)
+  return points === bestPoints
 }
 
-function calculatePositions(playerEntries: RaceEntry[], allEntries: RaceEntry[]): number[] {
+function calculatePositions(playerEntries: RaceEntry[], allEntries: RaceEntry[], lowerIsBetter: boolean = false): number[] {
   const positions: number[] = []
-  
+
   for (const entry of playerEntries) {
     const playlistEntries = allEntries.filter(e => e.elencoId === entry.elencoId)
-    const sorted = [...playlistEntries].sort((a, b) => b.puntiTotali - a.puntiTotali)
+    const sorted = [...playlistEntries].sort((a, b) => compareScores(a.puntiTotali, b.puntiTotali, lowerIsBetter))
     const position = sorted.findIndex(e => e.giocatore === entry.giocatore) + 1
     positions.push(position)
   }
-  
+
   return positions
 }
 
@@ -181,28 +188,7 @@ function getLast5PlaylistScores(playerEntries: RaceEntry[]): number[] {
   return last5.map(e => e.puntiTotali)
 }
 
-function getPlaylistWinners(entries: RaceEntry[]): Map<number, string> {
-  const winners = new Map<number, string>()
-  const playlistMap = new Map<number, RaceEntry[]>()
-  
-  for (const entry of entries) {
-    if (!playlistMap.has(entry.elencoId)) {
-      playlistMap.set(entry.elencoId, [])
-    }
-    playlistMap.get(entry.elencoId)!.push(entry)
-  }
-  
-  for (const [elencoId, playlistEntries] of playlistMap) {
-    const sorted = [...playlistEntries].sort((a, b) => b.puntiTotali - a.puntiTotali)
-    if (sorted.length > 0) {
-      winners.set(elencoId, sorted[0].giocatore)
-    }
-  }
-  
-  return winners
-}
-
-export function getPlaylistData(entries: RaceEntry[]): PlaylistData[] {
+export function getPlaylistData(entries: RaceEntry[], lowerIsBetter: boolean = false): PlaylistData[] {
   const playlistMap = new Map<number, RaceEntry[]>()
   
   for (const entry of entries) {
@@ -216,7 +202,7 @@ export function getPlaylistData(entries: RaceEntry[]): PlaylistData[] {
   
   for (const [elencoId, playlistEntries] of playlistMap) {
     const sorted: PlaylistResult[] = [...playlistEntries]
-      .sort((a, b) => b.puntiTotali - a.puntiTotali)
+      .sort((a, b) => compareScores(a.puntiTotali, b.puntiTotali, lowerIsBetter))
       .map((e, index) => ({
         player: e.giocatore,
         totalPoints: e.puntiTotali,
@@ -248,7 +234,7 @@ export function getPlayerEvolution(playerName: string, entries: RaceEntry[]): { 
     }))
 }
 
-export function getHeadToHead(player1: string, player2: string, entries: RaceEntry[]): { player1Wins: number; player2Wins: number; ties: number } {
+export function getHeadToHead(player1: string, player2: string, entries: RaceEntry[], lowerIsBetter: boolean = false): { player1Wins: number; player2Wins: number; ties: number } {
   const p1Norm = normalizePlayerName(player1)
   const p2Norm = normalizePlayerName(player2)
   
@@ -269,8 +255,9 @@ export function getHeadToHead(player1: string, player2: string, entries: RaceEnt
     const p2Entry = playlistEntries.find(e => normalizePlayerName(e.giocatore) === p2Norm)
     
     if (p1Entry && p2Entry) {
-      if (p1Entry.puntiTotali > p2Entry.puntiTotali) player1Wins++
-      else if (p2Entry.puntiTotali > p1Entry.puntiTotali) player2Wins++
+      const cmp = compareScores(p1Entry.puntiTotali, p2Entry.puntiTotali, lowerIsBetter)
+      if (cmp < 0) player1Wins++       // p1 ranks better
+      else if (cmp > 0) player2Wins++  // p2 ranks better
       else ties++
     }
   }

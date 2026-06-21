@@ -8,10 +8,12 @@ import { Header, SeasonFilter } from '@/components'
 import { parseCSV, processPlayerStats, getHeadToHead, filterEntriesBySeason, getAvailableYears } from '@/lib/data'
 import { getPlayerColor } from '@/lib/colors'
 import { PlayerStats, RaceEntry } from '@/types'
+import { useGameMode } from '@/lib/game-mode'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AreaChart, Area, LineChart, Line, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts'
 
 export default function DriversPage() {
+  const { config } = useGameMode()
   const [seasons, setSeasons] = useState<string[]>(['all'])
   const [players, setPlayers] = useState<PlayerStats[]>([])
   const [allEntries, setAllEntries] = useState<RaceEntry[]>([])
@@ -27,33 +29,37 @@ export default function DriversPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const entries = await parseCSV('/sdrogo_corse_chronological.csv')
+        setLoading(true)
+        const entries = await parseCSV(config.csvPath)
         setAllEntries(entries)
-        const minPlaylists = seasons.includes('all') ? 7 : 0
-        const playerStats = processPlayerStats(entries, minPlaylists)
+        const minPlaylists = seasons.includes('all') ? config.minPlaylistsAllTime : 0
+        const playerStats = processPlayerStats(entries, minPlaylists, config.lowerIsBetter)
         setPlayers(playerStats)
+        setSelectedPlayer(null)
       } catch (error) {
         console.error('Failed to load data:', error)
       } finally {
         setLoading(false)
       }
     }
-    
+
     loadData()
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.csvPath])
 
   useEffect(() => {
     if (allEntries.length > 0) {
-      const minPlaylists = seasons.includes('all') ? 7 : 0
-      const playerStats = processPlayerStats(filteredEntries, minPlaylists)
+      const minPlaylists = seasons.includes('all') ? config.minPlaylistsAllTime : 0
+      const playerStats = processPlayerStats(filteredEntries, minPlaylists, config.lowerIsBetter)
       setPlayers(playerStats)
-      
+
       if (selectedPlayer) {
         const updated = playerStats.find(p => p.normalizedName === selectedPlayer.normalizedName)
         setSelectedPlayer(updated || null)
       }
     }
-  }, [filteredEntries])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredEntries, config.lowerIsBetter, config.minPlaylistsAllTime])
 
   if (loading) {
     return (
@@ -77,7 +83,7 @@ export default function DriversPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div>
             <h1 className="font-condensed text-4xl font-black uppercase tracking-tighter text-white">
-              Piloti
+              {config.nav.drivers}
             </h1>
             <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest mt-1">
               Schieramento Ufficiale {seasons.includes('all') ? 'All-Time' : seasons.sort().join(' + ')}
@@ -106,7 +112,7 @@ export default function DriversPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.05 }}
                     onClick={() => setSelectedPlayer(player)}
-                    className="group relative overflow-hidden p-6 bg-zinc-900/50 border border-zinc-800 rounded-xl hover:bg-zinc-800/50 transition-all cursor-pointer shadow-xl hover:shadow-red-500/5"
+                    className="group relative overflow-hidden p-6 bg-zinc-900/50 border border-zinc-800 rounded-xl hover:bg-zinc-800/50 transition-all cursor-pointer shadow-xl hover:shadow-accent/5"
                     style={{ borderBottomWidth: '4px', borderBottomColor: getPlayerColor(player.normalizedName) }}
                   >
                     <div className="flex flex-col items-center gap-4">
@@ -175,7 +181,7 @@ export default function DriversPage() {
       <footer className="border-t border-zinc-800 mt-16 py-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-zinc-500 text-[10px] font-mono uppercase tracking-[0.2em]">
-            Sdrogo Corse Dashboard 2026 &copy; Tutti i video e i contenuti sono di proprietà dei rispettivi creatori
+            {config.title} Dashboard 2026 &copy; Tutti i video e i contenuti sono di proprietà dei rispettivi creatori
           </p>
           <p className="text-zinc-500 text-[10px] font-mono uppercase tracking-[0.2em]">
           Si ringrazia @abyss per la creazione delle statistiche
@@ -187,6 +193,8 @@ export default function DriversPage() {
 }
 
 function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats; allPlayers: PlayerStats[]; allEntries: RaceEntry[] }) {
+  const { config } = useGameMode()
+  const lowerIsBetter = config.lowerIsBetter
   const [selectedElenco, setSelectedElenco] = useState<{ id: number; index: number } | null>(null)
   const [comparisonPlayer, setComparisonPlayer] = useState<PlayerStats | null>(null)
   const [isCompareDropdownOpen, setIsCompareDropdownOpen] = useState(false)
@@ -293,6 +301,13 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
     return Math.max(...allPlayers.map(p => p.avgPoints)) || 1
   }, [allPlayers])
 
+  // Best average in the field. Racing: highest avg points. Golf: lowest avg strokes.
+  const bestAvgInField = useMemo(() => {
+    const avgs = allPlayers.map(p => p.avgPoints).filter(a => a > 0)
+    if (avgs.length === 0) return 1
+    return lowerIsBetter ? Math.min(...avgs) : Math.max(...avgs)
+  }, [allPlayers, lowerIsBetter])
+
   const { radarData, sdrogoScore, comparisonScore } = useMemo(() => {
     const metrics = [
       { key: 'Potenza', label: 'Potenza', weight: 0.25 },
@@ -310,8 +325,16 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
       const item: any = { metric: m.label }
       
       const calc = (p: PlayerStats) => {
-        if (m.key === 'Potenza') return (p.totalPoints / (60 * p.playlistsPlayed)) * 100
-        if (m.key === 'Media') return (p.avgPoints / maxAvgInField) * 100
+        // Racing rewards high points; golf rewards low strokes, so the point-based
+        // metrics (Potenza/Media) are scaled relative to the best avg in the field.
+        if (m.key === 'Potenza') {
+          if (lowerIsBetter) return p.avgPoints > 0 ? Math.min(100, (bestAvgInField / p.avgPoints) * 100) : 0
+          return (p.totalPoints / (60 * p.playlistsPlayed)) * 100
+        }
+        if (m.key === 'Media') {
+          if (lowerIsBetter) return p.avgPoints > 0 ? Math.min(100, (bestAvgInField / p.avgPoints) * 100) : 0
+          return (p.avgPoints / maxAvgInField) * 100
+        }
         if (m.key === 'Vittorie') return (p.playlistsWon / p.playlistsPlayed) * 100
         if (m.key === 'Elenchi') return (p.playlistsPlayed / totalPlaylistsCount) * 100
         if (m.key === 'Piazzam.') return Math.max(0, 100 - (p.avgPosition - 1) * 20)
@@ -333,16 +356,16 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
 
     return { 
       radarData: data, 
-      sdrogoScore: Math.round(totalScore), 
-      comparisonScore: Math.round(totalCompareScore) 
+      sdrogoScore: Math.round(totalScore),
+      comparisonScore: Math.round(totalCompareScore)
     }
-  }, [player, comparisonPlayer, maxAvgInField, totalPlaylistsCount])
+  }, [player, comparisonPlayer, maxAvgInField, bestAvgInField, lowerIsBetter, totalPlaylistsCount])
 
   const rivalries = useMemo(() => {
     return allPlayers
       .filter(p => p.normalizedName !== player.normalizedName)
       .map(rival => {
-        const h2h = getHeadToHead(player.normalizedName, rival.normalizedName, allEntries)
+        const h2h = getHeadToHead(player.normalizedName, rival.normalizedName, allEntries, lowerIsBetter)
         return {
           rival,
           player1Wins: h2h.player1Wins,
@@ -353,7 +376,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
       })
       .filter(r => r.total > 0)
       .sort((a, b) => b.total - a.total)
-  }, [player, allPlayers, allEntries])
+  }, [player, allPlayers, allEntries, lowerIsBetter])
 
   const playerColor = getPlayerColor(player.normalizedName)
   const rank = allPlayers.findIndex(p => p.normalizedName === player.normalizedName) + 1
@@ -414,8 +437,8 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Punti Totali" value={player.totalPoints} icon={<Target className="w-4 h-4" />} />
-        <StatCard label="Media Punti" value={player.avgPoints.toFixed(1)} icon={<Activity className="w-4 h-4" />} />
+        <StatCard label={`${config.scoreLabel} Totali`} value={player.totalPoints} icon={<Target className="w-4 h-4" />} />
+        <StatCard label={`Media ${config.scoreLabel}`} value={player.avgPoints.toFixed(1)} icon={<Activity className="w-4 h-4" />} />
         <StatCard label="Vittorie" value={player.playlistsWon} icon={<Trophy className="w-4 h-4" />} color="text-green-500" />
         <StatCard label="Elenchi" value={player.playlistsPlayed} icon={<ShieldCheck className="w-4 h-4" />} />
       </div>
@@ -531,7 +554,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                                   setIsCompareDropdownOpen(false)
                                 }}
                                 className={`w-full flex items-center justify-between px-4 py-3 text-left hover:bg-zinc-900 transition-colors ${
-                                  comparisonPlayer?.normalizedName === rival.normalizedName ? 'bg-red-500/5' : ''
+                                  comparisonPlayer?.normalizedName === rival.normalizedName ? 'bg-accent/5' : ''
                                 }`}
                               >
                                 <div className="flex items-center gap-3">
@@ -549,7 +572,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                                     {rival.normalizedName}
                                   </span>
                                 </div>
-                                {comparisonPlayer?.normalizedName === rival.normalizedName && <Check className="w-3 h-3 text-red-500" />}
+                                {comparisonPlayer?.normalizedName === rival.normalizedName && <Check className="w-3 h-3 text-accent" />}
                               </button>
                             ))}
                         </div>
@@ -566,27 +589,27 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                 <div className="absolute right-0 top-6 w-64 p-4 bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-50 pointer-events-none">
                   <div className="space-y-3 text-left">
                     <div>
-                      <div className="text-[10px] font-black uppercase text-red-500 mb-1">Potenza</div>
+                      <div className="text-[10px] font-black uppercase text-accent mb-1">Potenza</div>
                       <p className="text-[9px] text-zinc-400 leading-relaxed font-mono">Efficienza nel catturare i punti disponibili (max 60 per elenco). Formula: (Punti / (60 * Elenchi)) * 100</p>
                     </div>
                     <div>
-                      <div className="text-[10px] font-black uppercase text-red-500 mb-1">Media</div>
+                      <div className="text-[10px] font-black uppercase text-accent mb-1">Media</div>
                       <p className="text-[9px] text-zinc-400 leading-relaxed font-mono">Rendimento relativo alla miglior media punti registrata nel campionato.</p>
                     </div>
                     <div>
-                      <div className="text-[10px] font-black uppercase text-red-500 mb-1">Vittorie</div>
+                      <div className="text-[10px] font-black uppercase text-accent mb-1">Vittorie</div>
                       <p className="text-[9px] text-zinc-400 leading-relaxed font-mono">Percentuale di vittorie (1° posto) rispetto agli elenchi totali giocati dal pilota.</p>
                     </div>
                     <div>
-                      <div className="text-[10px] font-black uppercase text-red-500 mb-1">Elenchi</div>
+                      <div className="text-[10px] font-black uppercase text-accent mb-1">Elenchi</div>
                       <p className="text-[9px] text-zinc-400 leading-relaxed font-mono">Livello di partecipazione totale rispetto a tutti gli elenchi disponibili (30+).</p>
                     </div>
                     <div>
-                      <div className="text-[10px] font-black uppercase text-red-500 mb-1">Piazzam.</div>
+                      <div className="text-[10px] font-black uppercase text-accent mb-1">Piazzam.</div>
                       <p className="text-[9px] text-zinc-400 leading-relaxed font-mono">Qualità del piazzamento medio. Perde il 20% per ogni posizione oltre la prima.</p>
                     </div>
                     <div>
-                      <div className="text-[10px] font-black uppercase text-red-500 mb-1">Affidabilità.</div>
+                      <div className="text-[10px] font-black uppercase text-accent mb-1">Affidabilità.</div>
                       <p className="text-[9px] text-zinc-400 leading-relaxed font-mono">Resistenza ai "NON ARRIVATO". Percentuale di gare completate su quelle corse. </p>
                     </div>
                   </div>
@@ -640,7 +663,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
               <div 
                 key={rivalry.rival.normalizedName}
                 className={`bg-zinc-950/50 border rounded-xl p-4 flex flex-col gap-4 group transition-all relative overflow-hidden ${
-                  isComparing ? 'border-red-500 shadow-lg shadow-red-500/10' : 'border-zinc-800/50 hover:border-zinc-700'
+                  isComparing ? 'border-accent shadow-lg shadow-accent/10' : 'border-zinc-800/50 hover:border-zinc-700'
                 }`}
               >
                 <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -661,7 +684,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                     </div>
                     <div>
                       <div className="text-[11px] font-mono font-bold text-zinc-500 uppercase tracking-widest">Contro</div>
-                      <div className="font-condensed text-xl font-black uppercase tracking-tighter text-white group-hover:text-red-500 transition-colors leading-tight">
+                      <div className="font-condensed text-xl font-black uppercase tracking-tighter text-white group-hover:text-accent transition-colors leading-tight">
                         {rivalry.rival.normalizedName}
                       </div>
                     </div>
@@ -709,7 +732,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                       setComparisonPlayer(isComparing ? null : rivalry.rival);
                       document.getElementById('radar-comparison')?.scrollIntoView({ behavior: 'smooth' });
                     }}
-                    className={`flex items-center gap-1 transition-colors ${isComparing ? 'text-red-500 underline' : 'text-zinc-400 hover:text-white'}`}
+                    className={`flex items-center gap-1 transition-colors ${isComparing ? 'text-accent underline' : 'text-zinc-400 hover:text-white'}`}
                   >
                     {isComparing ? 'Annulla Confronto' : 'Confronta'} <ExternalLink className="w-2.5 h-2.5" />
                   </button>
@@ -733,16 +756,16 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                 <div
                   onClick={() => setSelectedElenco(isSelected ? null : { id: elencoId, index })}
                   className={`group flex flex-col items-center p-3 border rounded-lg transition-all cursor-pointer ${
-                    isSelected 
-                      ? 'bg-red-500/20 border-red-500 shadow-lg shadow-red-500/10' 
+                    isSelected
+                      ? 'bg-accent/20 border-accent shadow-lg shadow-accent/10'
                       : 'bg-zinc-800/20 border-zinc-800/50 hover:bg-zinc-800/50 hover:border-zinc-700'
                   }`}
                 >
                   <span className={`text-[9px] font-mono font-bold uppercase transition-colors ${
-                    isSelected ? 'text-red-400' : 'text-zinc-600 group-hover:text-zinc-400'
+                    isSelected ? 'text-accent' : 'text-zinc-600 group-hover:text-zinc-400'
                   }`}>E{index + 1}</span>
                   <span className={`font-mono font-black text-lg transition-colors ${
-                    isSelected ? 'text-white' : 'text-white group-hover:text-red-500'
+                    isSelected ? 'text-white' : 'text-white group-hover:text-accent'
                   }`}>{total}</span>
                 </div>
 
@@ -757,7 +780,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                         <div>
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="px-2 py-0.5 bg-red-600/10 text-red-500 rounded text-[10px] font-mono font-bold uppercase tracking-widest border border-red-500/20">
+                            <span className="px-2 py-0.5 bg-accent/10 text-accent rounded text-[10px] font-mono font-bold uppercase tracking-widest border border-accent/20">
                               Telemetria Elenco {selectedElenco.index + 1}
                             </span>
                           </div>
@@ -769,7 +792,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                               href={playlistInfo.videoLink} 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 mt-2 text-zinc-500 hover:text-red-500 transition-colors group text-[10px] font-mono font-bold uppercase tracking-widest"
+                              className="inline-flex items-center gap-2 mt-2 text-zinc-500 hover:text-accent transition-colors group text-[10px] font-mono font-bold uppercase tracking-widest"
                             >
                               <ExternalLink className="w-3 h-3" />
                               Guarda il video integrale

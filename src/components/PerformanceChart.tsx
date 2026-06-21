@@ -114,7 +114,7 @@ export function PerformanceChart({ players }: PerformanceChartProps) {
                             setIsDropdownOpen(false)
                           }}
                           className={`w-full flex items-center justify-between px-4 py-3 text-left hover:bg-zinc-800 transition-colors ${
-                            selectedPlayer === p.normalizedName ? 'bg-red-500/10' : ''
+                            selectedPlayer === p.normalizedName ? 'bg-accent/10' : ''
                           }`}
                         >
                           <span 
@@ -123,7 +123,7 @@ export function PerformanceChart({ players }: PerformanceChartProps) {
                           >
                             {p.normalizedName}
                           </span>
-                          {selectedPlayer === p.normalizedName && <Check className="w-3 h-3 text-red-500" />}
+                          {selectedPlayer === p.normalizedName && <Check className="w-3 h-3 text-accent" />}
                         </button>
                       ))}
                     </div>

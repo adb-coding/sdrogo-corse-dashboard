@@ -5,31 +5,34 @@ import { Header, TopThree, Leaderboard, PlaylistViewer, SeasonFilter } from '@/c
 import { PerformanceChart } from '@/components/PerformanceChart'
 import { parseCSV, processPlayerStats, getPlaylistData, filterEntriesBySeason, getAvailableYears } from '@/lib/data'
 import { PlayerStats, PlaylistData, RaceEntry } from '@/types'
+import { useGameMode } from '@/lib/game-mode'
 
 export default function Home() {
+  const { config } = useGameMode()
   const [seasons, setSeasons] = useState<string[]>(['all'])
   const [allEntries, setAllEntries] = useState<RaceEntry[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function loadData() {
-      const entries = await parseCSV('/sdrogo_corse_chronological.csv')
+      setLoading(true)
+      const entries = await parseCSV(config.csvPath)
       setAllEntries(entries)
       setLoading(false)
     }
     loadData()
-  }, [])
+  }, [config.csvPath])
 
   const availableYears = useMemo(() => getAvailableYears(allEntries), [allEntries])
 
   const filteredData = useMemo(() => {
     const filtered = filterEntriesBySeason(allEntries, seasons)
-    const minPlaylists = seasons.includes('all') ? 7 : 0
+    const minPlaylists = seasons.includes('all') ? config.minPlaylistsAllTime : 0
     return {
-      players: processPlayerStats(filtered, minPlaylists),
-      playlists: getPlaylistData(filtered)
+      players: processPlayerStats(filtered, minPlaylists, config.lowerIsBetter),
+      playlists: getPlaylistData(filtered, config.lowerIsBetter)
     }
-  }, [seasons, allEntries])
+  }, [seasons, allEntries, config.minPlaylistsAllTime, config.lowerIsBetter])
 
   const { players, playlists } = filteredData
 
@@ -53,10 +56,10 @@ export default function Home() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <h1 className="font-condensed text-4xl font-black uppercase tracking-tighter text-white">
-              Sdrogo Corse
+              {config.title}
             </h1>
             <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest mt-1">
-              Statistiche Ufficiali del Campionato
+              {config.subtitle}
             </p>
           </div>
           <SeasonFilter 
@@ -76,9 +79,9 @@ export default function Home() {
               Classifica {seasons.includes('all') ? 'Globale' : seasons.sort().join(' + ')}
             </h2>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
               <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest font-bold">
-                {players.length} Piloti Attivi
+                {players.length} {config.nav.drivers} Attivi
               </span>
             </div>
           </div>
@@ -104,7 +107,7 @@ export default function Home() {
       <footer className="border-t border-zinc-800 mt-16 py-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-zinc-500 text-[10px] font-mono uppercase tracking-[0.3em]">
-            Sdrogo Corse Dashboard 2026 &copy; Tutti i video e i contenuti sono di proprietà dei rispettivi creatori.
+            {config.title} Dashboard 2026 &copy; Tutti i video e i contenuti sono di proprietà dei rispettivi creatori.
           </p>
           <p className="text-zinc-500 text-[10px] font-mono tracking-[0.3em]">
           Si ringrazia @antobeviz per la creazione delle statistiche
