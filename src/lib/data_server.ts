@@ -104,7 +104,8 @@ export function processPlayerStats(entries: RaceEntry[], minPlaylists: number = 
     const allScores = playerEntries.map(e => e.punteggiSingoleGare).flat()
     const form = getLast5PlaylistScores(playerEntries)
     const dnfCount = allScores.filter(score => score === 0).length
-    
+    const holeInOne = allScores.filter(score => score === 1).length
+
     const positions = calculatePositions(playerEntries, entries)
     const avgPosition = Number((positions.reduce((a, b) => a + b, 0) / positions.length).toFixed(2))
     
@@ -128,6 +129,10 @@ export function processPlayerStats(entries: RaceEntry[], minPlaylists: number = 
       elencoIds: playerEntries.map(e => e.elencoId),
       totalRaces,
       dnfCount,
+      holeInOne,
+      totalVsPar: 0,
+      avgVsPar: 0,
+      vsPar: [],
       images,
       tag: playerTags
       })

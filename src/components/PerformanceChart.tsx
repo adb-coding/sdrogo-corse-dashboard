@@ -1,25 +1,33 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { ChevronDown, BarChart2, Activity, Check } from 'lucide-react'
-import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from 'recharts'
+import { useState, useMemo, useEffect } from 'react'
+import { ChevronDown, BarChart2, Activity, Check, Flag } from 'lucide-react'
+import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid, ReferenceLine } from 'recharts'
 import { PlayerStats } from '@/types'
 import { getPlayerColor } from '@/lib/colors'
+import { useGameMode } from '@/lib/game-mode'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface PerformanceChartProps {
   players: PlayerStats[]
 }
 
-type ViewMode = 'punti' | 'posizione'
+type ViewMode = 'punti' | 'posizione' | 'par'
 
 export function PerformanceChart({ players }: PerformanceChartProps) {
+  const { config } = useGameMode()
+  const showPar = config.lowerIsBetter
   // Guard against empty players array
   const initialPlayer = players.length > 0 ? players[0].normalizedName : ''
   const [selectedPlayer, setSelectedPlayer] = useState<string>(initialPlayer)
   const [viewMode, setViewMode] = useState<ViewMode>('punti')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  
+
+  // The +/- Par view only exists in golf; fall back when the mode changes.
+  useEffect(() => {
+    if (!showPar && viewMode === 'par') setViewMode('punti')
+  }, [showPar, viewMode])
+
   const chartData = useMemo(() => {
     if (!selectedPlayer) return []
     const player = players.find(p => p.normalizedName === selectedPlayer)
@@ -29,6 +37,11 @@ export function PerformanceChart({ players }: PerformanceChartProps) {
       return (player.raceScores || []).map((scores, index) => ({
         name: `Elenco ${index + 1}`,
         points: (scores || []).reduce((a, b) => a + b, 0)
+      }))
+    } else if (viewMode === 'par') {
+      return (player.vsPar || []).map((diff, index) => ({
+        name: `Elenco ${index + 1}`,
+        points: diff
       }))
     } else {
       return (player.positions || []).map((pos, index) => ({
@@ -41,7 +54,10 @@ export function PerformanceChart({ players }: PerformanceChartProps) {
   if (players.length === 0) return null
 
   const playerColor = getPlayerColor(selectedPlayer)
-  const yDomain: [number, number | 'auto'] = viewMode === 'posizione' ? [1, Math.max(players.length, 1)] : [0, 'auto']
+  const yDomain: [number, number | 'auto'] =
+    viewMode === 'posizione' ? [1, Math.max(players.length, 1)]
+    : viewMode === 'par' ? ['auto', 'auto'] as unknown as [number, number | 'auto']
+    : [0, 'auto']
 
   return (
     <div className="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg p-6 shadow-xl">
@@ -67,8 +83,22 @@ export function PerformanceChart({ players }: PerformanceChartProps) {
               style={viewMode === 'punti' ? { backgroundColor: playerColor } : {}}
             >
               <BarChart2 className="w-3.5 h-3.5" />
-              PUNTI
+              {config.scoreLabel.toUpperCase()}
             </button>
+            {showPar && (
+              <button
+                onClick={() => setViewMode('par')}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold transition-all ${
+                  viewMode === 'par'
+                    ? 'text-white shadow-lg'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+                style={viewMode === 'par' ? { backgroundColor: playerColor } : {}}
+              >
+                <Flag className="w-3.5 h-3.5" />
+                +/- PAR
+              </button>
+            )}
             <button
               onClick={() => setViewMode('posizione')}
               className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold transition-all ${
@@ -179,14 +209,17 @@ export function PerformanceChart({ players }: PerformanceChartProps) {
               itemStyle={{ color: playerColor, fontWeight: 'bold' }}
               labelStyle={{ color: '#a1a1aa', marginBottom: '4px', fontWeight: 'bold' }}
               formatter={(value: any) => [
-                viewMode === 'posizione' ? `${value}°` : value, 
-                viewMode === 'posizione' ? 'Posizione' : 'Punti'
+                viewMode === 'posizione' ? `${value}°`
+                  : viewMode === 'par' ? (value > 0 ? `+${value}` : value < 0 ? `${value}` : 'E')
+                  : value,
+                viewMode === 'posizione' ? 'Posizione' : viewMode === 'par' ? '+/- Par' : config.scoreLabel
               ]}
             />
+            {viewMode === 'par' && <ReferenceLine y={0} stroke="#52525b" strokeDasharray="4 4" />}
             <Area
               type="monotone"
               dataKey="points"
-              name={viewMode === 'posizione' ? 'Posizione' : 'Punti'}
+              name={viewMode === 'posizione' ? 'Posizione' : viewMode === 'par' ? '+/- Par' : config.scoreLabel}
               stroke={playerColor}
               strokeWidth={3}
               fillOpacity={1}
@@ -202,7 +235,9 @@ export function PerformanceChart({ players }: PerformanceChartProps) {
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: playerColor }} />
           <span className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">
-            {viewMode === 'punti' ? 'Punti per Elenco' : 'Posizione Finale per Elenco'}
+            {viewMode === 'punti' ? `${config.scoreLabel} per Elenco`
+              : viewMode === 'par' ? '+/- Par per Elenco'
+              : 'Posizione Finale per Elenco'}
           </span>
         </div>
       </div>

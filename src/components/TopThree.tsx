@@ -8,7 +8,7 @@ import { getPlayerColor } from '@/lib/colors'
 import { useGameMode } from '@/lib/game-mode'
 import { motion, AnimatePresence } from 'framer-motion'
 
-type SortMetric = 'totalPoints' | 'avgPoints' | 'playlistsWon' | 'avgPosition' | 'winRate'
+type SortMetric = 'totalPoints' | 'avgPoints' | 'playlistsWon' | 'avgPosition' | 'winRate' | 'totalVsPar' | 'avgVsPar' | 'holeInOne'
 
 // Metrics that follow the game's scoring direction (low strokes win in golf).
 const SCORE_METRICS: SortMetric[] = ['totalPoints', 'avgPoints']
@@ -27,16 +27,28 @@ interface PodiumCardProps {
 
 const METRIC_CONFIG: Record<SortMetric, { label: string; unit: string; better: 'higher' | 'lower' }> = {
   totalPoints: { label: 'Punti Totali', unit: 'pt', better: 'higher' },
-  avgPoints: { label: 'Media Punti', unit: 'pt', better: 'higher' },
+  avgPoints: { label: 'Media', unit: '', better: 'higher' },
   playlistsWon: { label: 'Vittorie', unit: 'W', better: 'higher' },
   avgPosition: { label: 'Pos. Media', unit: '', better: 'lower' },
-  winRate: {label: '% Vittorie', unit: '%', better: 'higher'}
+  winRate: { label: '% Vittorie', unit: '%', better: 'higher' },
+  totalVsPar: { label: '+/- Par', unit: '', better: 'lower' },
+  avgVsPar: { label: 'Media +/- Par', unit: '', better: 'lower' },
+  holeInOne: { label: 'Hole in One', unit: '', better: 'higher' },
 }
+
+// Podium metric choices differ by game: golf cares about wins, win%, par, not totals.
+const RACING_METRICS: SortMetric[] = ['totalPoints', 'avgPoints', 'playlistsWon', 'avgPosition', 'winRate']
+const GOLF_METRICS: SortMetric[] = ['playlistsWon', 'winRate', 'avgPoints', 'avgPosition', 'totalVsPar', 'avgVsPar', 'holeInOne']
+
+// Strokes relative to par: +n over, -n under, E even.
+const formatVsPar = (v: number): string => (v > 0 ? `+${v}` : v < 0 ? `${v}` : 'E')
+const formatAvgVsPar = (v: number): string => (v > 0 ? `+${v.toFixed(1)}` : v.toFixed(1))
 
 export function TopThree({ players }: TopThreeProps) {
   const { config } = useGameMode()
-  // Golf's headline metric is average strokes; racing's is total points.
-  const defaultMetric: SortMetric = config.lowerIsBetter ? 'avgPoints' : 'totalPoints'
+  const availableMetrics = config.lowerIsBetter ? GOLF_METRICS : RACING_METRICS
+  // Golf headlines wins; racing headlines total points.
+  const defaultMetric: SortMetric = config.lowerIsBetter ? 'playlistsWon' : 'totalPoints'
   const [sortMetric, setSortMetric] = useState<SortMetric>(defaultMetric)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
@@ -76,11 +88,12 @@ export function TopThree({ players }: TopThreeProps) {
         
         {/* Metric Selector - Hidden on mobile, moved below */}
         <div className="hidden md:block relative">
-          <MetricSelector 
-            sortMetric={sortMetric} 
-            setSortMetric={setSortMetric} 
-            isDropdownOpen={isDropdownOpen} 
-            setIsDropdownOpen={setIsDropdownOpen} 
+          <MetricSelector
+            sortMetric={sortMetric}
+            setSortMetric={setSortMetric}
+            isDropdownOpen={isDropdownOpen}
+            setIsDropdownOpen={setIsDropdownOpen}
+            metrics={availableMetrics}
           />
         </div>
       </div>
@@ -141,11 +154,12 @@ export function TopThree({ players }: TopThreeProps) {
 
       {/* Metric Selector for Mobile - Shown only on mobile below podium */}
       <div className="md:hidden mt-8 flex justify-center px-4">
-        <MetricSelector 
-          sortMetric={sortMetric} 
-          setSortMetric={setSortMetric} 
-          isDropdownOpen={isDropdownOpen} 
-          setIsDropdownOpen={setIsDropdownOpen} 
+        <MetricSelector
+          sortMetric={sortMetric}
+          setSortMetric={setSortMetric}
+          isDropdownOpen={isDropdownOpen}
+          setIsDropdownOpen={setIsDropdownOpen}
+          metrics={availableMetrics}
           fullWidth
         />
       </div>
@@ -153,17 +167,19 @@ export function TopThree({ players }: TopThreeProps) {
   )
 }
 
-function MetricSelector({ 
-  sortMetric, 
-  setSortMetric, 
-  isDropdownOpen, 
+function MetricSelector({
+  sortMetric,
+  setSortMetric,
+  isDropdownOpen,
   setIsDropdownOpen,
+  metrics,
   fullWidth = false
-}: { 
-  sortMetric: SortMetric; 
-  setSortMetric: (m: SortMetric) => void; 
-  isDropdownOpen: boolean; 
+}: {
+  sortMetric: SortMetric;
+  setSortMetric: (m: SortMetric) => void;
+  isDropdownOpen: boolean;
   setIsDropdownOpen: (o: boolean) => void;
+  metrics: SortMetric[];
   fullWidth?: boolean;
 }) {
   return (
@@ -191,7 +207,7 @@ function MetricSelector({
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
               className={`absolute ${fullWidth ? 'left-0 right-0' : 'right-0'} mt-2 bg-zinc-900 border border-zinc-800 rounded-md shadow-2xl z-50 overflow-hidden`}
             >
-              {(Object.keys(METRIC_CONFIG) as SortMetric[]).map((metric) => (
+              {metrics.map((metric) => (
                 <button
                   key={metric}
                   onClick={() => {
@@ -219,6 +235,12 @@ function MetricSelector({
 function PodiumCard({ player, rank, color, isWinner, metric }: PodiumCardProps) {
   const { label, unit } = METRIC_CONFIG[metric]
   const metricValue = player[metric] as number
+
+  const displayValue =
+    metric === 'totalVsPar' ? formatVsPar(metricValue)
+    : metric === 'avgVsPar' ? formatAvgVsPar(metricValue)
+    : metric === 'avgPosition' || metric === 'avgPoints' ? metricValue.toFixed(1)
+    : metricValue
 
   return (
     <motion.div 
@@ -256,7 +278,7 @@ function PodiumCard({ player, rank, color, isWinner, metric }: PodiumCardProps) 
           {player.normalizedName}
         </h3>
         <div className="font-mono text-xl md:text-4xl font-black mb-0.5 md:mb-1 text-white tracking-tighter">
-          {metric === 'avgPosition' ? metricValue.toFixed(1) : metricValue}
+          {displayValue}
           {unit && <span className="text-[8px] md:text-[10px] text-zinc-500 ml-0.5 md:ml-1 font-bold">{unit}</span>}
         </div>
         <div className="text-[8px] md:text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2 md:mb-4">

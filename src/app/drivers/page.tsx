@@ -3,14 +3,18 @@
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft, User, Trophy, Activity, Target, ShieldCheck, X, ExternalLink, Info, ChevronDown, Check, Youtube, Instagram, Twitch } from 'lucide-react'
+import { ArrowLeft, User, Trophy, Activity, Target, ShieldCheck, X, ExternalLink, Info, ChevronDown, Check, Youtube, Instagram, Twitch, Flag } from 'lucide-react'
 import { Header, SeasonFilter } from '@/components'
 import { parseCSV, processPlayerStats, getHeadToHead, filterEntriesBySeason, getAvailableYears } from '@/lib/data'
 import { getPlayerColor } from '@/lib/colors'
 import { PlayerStats, RaceEntry } from '@/types'
 import { useGameMode } from '@/lib/game-mode'
 import { motion, AnimatePresence } from 'framer-motion'
-import { AreaChart, Area, LineChart, Line, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts'
+import { AreaChart, Area, LineChart, Line, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ReferenceLine } from 'recharts'
+
+// Strokes relative to par: +n over, -n under, E even.
+const formatVsPar = (v: number): string => (v > 0 ? `+${v}` : v < 0 ? `${v}` : 'E')
+const vsParColor = (v: number): string => (v < 0 ? 'text-green-500' : v > 0 ? 'text-red-400' : 'text-white')
 
 export default function DriversPage() {
   const { config } = useGameMode()
@@ -140,18 +144,37 @@ export default function DriversPage() {
                       </div>
 
                       <div className="grid grid-cols-3 gap-2 w-full pt-4 border-t border-zinc-800/50">
-                        <div className="text-center">
-                          <div className="text-[10px] text-zinc-500 font-bold uppercase mb-1">PTS</div>
-                          <div className="font-mono text-xs font-black text-white">{player.totalPoints}</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-[10px] text-zinc-500 font-bold uppercase mb-1">MED</div>
-                          <div className="font-mono text-xs font-black text-zinc-400">{player.avgPoints.toFixed(1)}</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-[10px] text-zinc-500 font-bold uppercase mb-1">WIN</div>
-                          <div className="font-mono text-xs font-black text-green-500">{player.playlistsWon}</div>
-                        </div>
+                        {config.lowerIsBetter ? (
+                          <>
+                            <div className="text-center">
+                              <div className="text-[10px] text-zinc-500 font-bold uppercase mb-1">MED</div>
+                              <div className="font-mono text-xs font-black text-zinc-400">{player.avgPoints.toFixed(1)}</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-[10px] text-zinc-500 font-bold uppercase mb-1">PAR</div>
+                              <div className={`font-mono text-xs font-black ${vsParColor(player.totalVsPar)}`}>{formatVsPar(player.totalVsPar)}</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-[10px] text-zinc-500 font-bold uppercase mb-1">WIN</div>
+                              <div className="font-mono text-xs font-black text-green-500">{player.playlistsWon}</div>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-center">
+                              <div className="text-[10px] text-zinc-500 font-bold uppercase mb-1">PTS</div>
+                              <div className="font-mono text-xs font-black text-white">{player.totalPoints}</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-[10px] text-zinc-500 font-bold uppercase mb-1">MED</div>
+                              <div className="font-mono text-xs font-black text-zinc-400">{player.avgPoints.toFixed(1)}</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-[10px] text-zinc-500 font-bold uppercase mb-1">WIN</div>
+                              <div className="font-mono text-xs font-black text-green-500">{player.playlistsWon}</div>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   </motion.div>
@@ -198,6 +221,8 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
   const [selectedElenco, setSelectedElenco] = useState<{ id: number; index: number } | null>(null)
   const [comparisonPlayer, setComparisonPlayer] = useState<PlayerStats | null>(null)
   const [isCompareDropdownOpen, setIsCompareDropdownOpen] = useState(false)
+  // Golf score-analysis chart: final position or strokes vs par.
+  const [analisiMode, setAnalisiMode] = useState<'posizione' | 'par'>('posizione')
 
   const SOCIAL_LINKS: Record<string, { yt?: string; ig?: string; twitch?: string }> = {
     Dread: {
@@ -248,6 +273,33 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
     race: `E${index + 1}`,
     punti: scores.reduce((a, b) => a + b, 0)
   }))
+
+  // Golf: chart final position (default) or strokes vs par per elenco.
+  const golfAnalisiData = player.raceScores.map((scores, index) => ({
+    race: `E${index + 1}`,
+    value: analisiMode === 'par' ? player.vsPar[index] : player.positions[index]
+  }))
+
+  // Most recent elenco the player took part in (highest elencoId).
+  const lastRaceIndex = player.elencoIds.length
+    ? player.elencoIds.reduce((maxI, id, i, arr) => (id > arr[maxI] ? i : maxI), 0)
+    : -1
+  const lastRace = lastRaceIndex >= 0 ? (() => {
+    const elencoId = player.elencoIds[lastRaceIndex]
+    const meta = allEntries.find(e => e.elencoId === elencoId)
+    const fieldSize = allEntries.filter(e => e.elencoId === elencoId && e.giocatore.trim().toUpperCase() !== 'PAR').length
+    return {
+      elencoId,
+      total: player.raceScores[lastRaceIndex].reduce((a, b) => a + b, 0),
+      position: player.positions[lastRaceIndex],
+      vsPar: player.vsPar[lastRaceIndex],
+      holeInOne: player.raceScores[lastRaceIndex].filter(s => s === 1).length,
+      fieldSize,
+      title: meta?.videoTitle || '',
+      link: meta?.videoLink || '',
+      owner: meta?.videoOwner || '',
+    }
+  })() : null
 
   const multiEvolutionData = useMemo(() => {
     if (!selectedElenco) return { data: [], players: [] }
@@ -309,7 +361,22 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
   }, [allPlayers, lowerIsBetter])
 
   const { radarData, sdrogoScore, comparisonScore } = useMemo(() => {
-    const metrics = [
+    // Golf-only field baselines for the Precisione / PAR axes.
+    const totalShotsOf = (p: PlayerStats) => p.raceScores.reduce((s, arr) => s + arr.reduce((a, b) => a + b, 0), 0)
+    const precisionOf = (p: PlayerStats) => { const t = totalShotsOf(p); return t > 0 ? p.holeInOne / t : 0 }
+    const bestPrecision = Math.max(...allPlayers.map(precisionOf), 0)
+    const parVals = allPlayers.map(p => p.avgVsPar)
+    const bestPar = parVals.length ? Math.min(...parVals) : 0
+    const worstPar = parVals.length ? Math.max(...parVals) : 0
+
+    const metrics = lowerIsBetter ? [
+      { key: 'Precisione', label: 'Precisione', weight: 0.25 },
+      { key: 'Media', label: 'Media', weight: 0.25 },
+      { key: 'Vittorie', label: 'Vittorie', weight: 0.20 },
+      { key: 'Elenchi', label: 'Elenchi', weight: 0.10 },
+      { key: 'Piazzam.', label: 'Piazzam.', weight: 0.10 },
+      { key: 'PAR', label: 'PAR', weight: 0.10 },
+    ] : [
       { key: 'Potenza', label: 'Potenza', weight: 0.25 },
       { key: 'Media', label: 'Media', weight: 0.25 },
       { key: 'Vittorie', label: 'Vittorie', weight: 0.20 },
@@ -323,8 +390,12 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
 
     const data = metrics.map(m => {
       const item: any = { metric: m.label }
-      
+
       const calc = (p: PlayerStats) => {
+        // Golf: share of shots that were hole-in-ones, relative to the field best.
+        if (m.key === 'Precisione') return bestPrecision > 0 ? (precisionOf(p) / bestPrecision) * 100 : 0
+        // Golf: average strokes vs par, scaled so the field's best (lowest) = 100.
+        if (m.key === 'PAR') return worstPar === bestPar ? 100 : ((worstPar - p.avgVsPar) / (worstPar - bestPar)) * 100
         // Racing rewards high points; golf rewards low strokes, so the point-based
         // metrics (Potenza/Media) are scaled relative to the best avg in the field.
         if (m.key === 'Potenza') {
@@ -359,7 +430,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
       sdrogoScore: Math.round(totalScore),
       comparisonScore: Math.round(totalCompareScore)
     }
-  }, [player, comparisonPlayer, maxAvgInField, bestAvgInField, lowerIsBetter, totalPlaylistsCount])
+  }, [player, comparisonPlayer, maxAvgInField, bestAvgInField, lowerIsBetter, totalPlaylistsCount, allPlayers])
 
   const rivalries = useMemo(() => {
     return allPlayers
@@ -437,41 +508,114 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label={`${config.scoreLabel} Totali`} value={player.totalPoints} icon={<Target className="w-4 h-4" />} />
-        <StatCard label={`Media ${config.scoreLabel}`} value={player.avgPoints.toFixed(1)} icon={<Activity className="w-4 h-4" />} />
-        <StatCard label="Vittorie" value={player.playlistsWon} icon={<Trophy className="w-4 h-4" />} color="text-green-500" />
-        <StatCard label="Elenchi" value={player.playlistsPlayed} icon={<ShieldCheck className="w-4 h-4" />} />
+        {lowerIsBetter ? (
+          <>
+            <StatCard label={`Media ${config.scoreLabel}`} value={player.avgPoints.toFixed(1)} icon={<Activity className="w-4 h-4" />} />
+            <StatCard label="Vittorie" value={`${player.playlistsWon} (${player.winRate}%)`} icon={<Trophy className="w-4 h-4" />} color="text-green-500" />
+            <StatCard label="+/- Par" value={formatVsPar(player.totalVsPar)} icon={<Flag className="w-4 h-4" />} color={vsParColor(player.totalVsPar)} />
+            <StatCard label="Hole in One" value={player.holeInOne} icon={<Target className="w-4 h-4" />} color="text-amber-400" />
+          </>
+        ) : (
+          <>
+            <StatCard label={`${config.scoreLabel} Totali`} value={player.totalPoints} icon={<Target className="w-4 h-4" />} />
+            <StatCard label={`Media ${config.scoreLabel}`} value={player.avgPoints.toFixed(1)} icon={<Activity className="w-4 h-4" />} />
+            <StatCard label="Vittorie" value={player.playlistsWon} icon={<Trophy className="w-4 h-4" />} color="text-green-500" />
+            <StatCard label="Elenchi" value={player.playlistsPlayed} icon={<ShieldCheck className="w-4 h-4" />} />
+          </>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Performance Chart */}
         <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 shadow-xl">
-          <h3 className="font-condensed text-xl font-black uppercase tracking-tighter text-white mb-6">Analisi Punteggio</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <h3 className="font-condensed text-xl font-black uppercase tracking-tighter text-white">
+              {lowerIsBetter ? (analisiMode === 'par' ? 'Analisi +/- Par' : 'Analisi Posizione') : 'Analisi Punteggio'}
+            </h3>
+            {lowerIsBetter && (
+              <div className="flex bg-zinc-800 p-1 rounded-md border border-zinc-700 self-start sm:self-auto">
+                <button
+                  onClick={() => setAnalisiMode('posizione')}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold transition-all ${analisiMode === 'posizione' ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'}`}
+                  style={analisiMode === 'posizione' ? { backgroundColor: playerColor } : {}}
+                >
+                  <Activity className="w-3.5 h-3.5" />
+                  POSIZIONE
+                </button>
+                <button
+                  onClick={() => setAnalisiMode('par')}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold transition-all ${analisiMode === 'par' ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'}`}
+                  style={analisiMode === 'par' ? { backgroundColor: playerColor } : {}}
+                >
+                  <Flag className="w-3.5 h-3.5" />
+                  +/- PAR
+                </button>
+              </div>
+            )}
+          </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={evolutionData}>
-                <defs>
-                  <linearGradient id="profileGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={playerColor} stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor={playerColor} stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                <XAxis dataKey="race" stroke="#52525b" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontFamily: 'monospace' }} />
-                <YAxis stroke="#52525b" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontFamily: 'monospace' }} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '8px', fontSize: '11px' }}
-                  labelStyle={{ color: '#71717a', fontWeight: 'bold' }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="punti"
-                  stroke={playerColor}
-                  strokeWidth={3}
-                  fill="url(#profileGradient)"
-                  animationDuration={1500}
-                />
-              </AreaChart>
+              {lowerIsBetter ? (
+                <AreaChart data={golfAnalisiData}>
+                  <defs>
+                    <linearGradient id="profileGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={playerColor} stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor={playerColor} stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                  <XAxis dataKey="race" stroke="#52525b" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontFamily: 'monospace' }} />
+                  <YAxis
+                    stroke="#52525b" fontSize={10} axisLine={false} tickLine={false}
+                    tick={{ fill: '#71717a', fontFamily: 'monospace' }}
+                    allowDecimals={false}
+                    reversed={analisiMode === 'posizione'}
+                    domain={analisiMode === 'posizione' ? [1, Math.max(allPlayers.length, 1)] : ['auto', 'auto']}
+                  />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '8px', fontSize: '11px' }}
+                    labelStyle={{ color: '#71717a', fontWeight: 'bold' }}
+                    formatter={(value: any) => [
+                      analisiMode === 'par' ? (value > 0 ? `+${value}` : value < 0 ? `${value}` : 'E') : `${value}°`,
+                      analisiMode === 'par' ? '+/- Par' : 'Posizione'
+                    ]}
+                  />
+                  {analisiMode === 'par' && <ReferenceLine y={0} stroke="#52525b" strokeDasharray="4 4" />}
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke={playerColor}
+                    strokeWidth={3}
+                    fill="url(#profileGradient)"
+                    baseValue={analisiMode === 'posizione' ? Math.max(allPlayers.length, 1) : 0}
+                    animationDuration={1500}
+                  />
+                </AreaChart>
+              ) : (
+                <AreaChart data={evolutionData}>
+                  <defs>
+                    <linearGradient id="profileGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={playerColor} stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor={playerColor} stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                  <XAxis dataKey="race" stroke="#52525b" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontFamily: 'monospace' }} />
+                  <YAxis stroke="#52525b" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontFamily: 'monospace' }} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '8px', fontSize: '11px' }}
+                    labelStyle={{ color: '#71717a', fontWeight: 'bold' }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="punti"
+                    stroke={playerColor}
+                    strokeWidth={3}
+                    fill="url(#profileGradient)"
+                    animationDuration={1500}
+                  />
+                </AreaChart>
+              )}
             </ResponsiveContainer>
           </div>
         </div>
@@ -588,10 +732,17 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                 <Info className="w-4 h-4 text-zinc-500 hover:text-white cursor-help transition-colors" />
                 <div className="absolute right-0 top-6 w-64 p-4 bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-50 pointer-events-none">
                   <div className="space-y-3 text-left">
-                    <div>
-                      <div className="text-[10px] font-black uppercase text-accent mb-1">Potenza</div>
-                      <p className="text-[9px] text-zinc-400 leading-relaxed font-mono">Efficienza nel catturare i punti disponibili (max 60 per elenco). Formula: (Punti / (60 * Elenchi)) * 100</p>
-                    </div>
+                    {lowerIsBetter ? (
+                      <div>
+                        <div className="text-[10px] font-black uppercase text-accent mb-1">Precisione</div>
+                        <p className="text-[9px] text-zinc-400 leading-relaxed font-mono">Percentuale di hole in one sul totale dei colpi tirati, rapportata al miglior golfista del tour.</p>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="text-[10px] font-black uppercase text-accent mb-1">Potenza</div>
+                        <p className="text-[9px] text-zinc-400 leading-relaxed font-mono">Efficienza nel catturare i punti disponibili (max 60 per elenco). Formula: (Punti / (60 * Elenchi)) * 100</p>
+                      </div>
+                    )}
                     <div>
                       <div className="text-[10px] font-black uppercase text-accent mb-1">Media</div>
                       <p className="text-[9px] text-zinc-400 leading-relaxed font-mono">Rendimento relativo alla miglior media punti registrata nel campionato.</p>
@@ -608,10 +759,17 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                       <div className="text-[10px] font-black uppercase text-accent mb-1">Piazzam.</div>
                       <p className="text-[9px] text-zinc-400 leading-relaxed font-mono">Qualità del piazzamento medio. Perde il 20% per ogni posizione oltre la prima.</p>
                     </div>
-                    <div>
-                      <div className="text-[10px] font-black uppercase text-accent mb-1">Affidabilità.</div>
-                      <p className="text-[9px] text-zinc-400 leading-relaxed font-mono">Resistenza ai "NON ARRIVATO". Percentuale di gare completate su quelle corse. </p>
-                    </div>
+                    {lowerIsBetter ? (
+                      <div>
+                        <div className="text-[10px] font-black uppercase text-accent mb-1">PAR</div>
+                        <p className="text-[9px] text-zinc-400 leading-relaxed font-mono">Media colpi rispetto al par: più si gioca sotto par, più alto è il punteggio.</p>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="text-[10px] font-black uppercase text-accent mb-1">Affidabilità.</div>
+                        <p className="text-[9px] text-zinc-400 leading-relaxed font-mono">Resistenza ai "NON ARRIVATO". Percentuale di gare completate su quelle corse. </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -646,6 +804,63 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
           </div>
         </div>
       </div>
+
+      {/* Ultima Gara */}
+      {lastRace && (
+        <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 shadow-xl">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-condensed text-xl font-black uppercase tracking-tighter text-white">Ultima Gara</h3>
+            <span className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-widest bg-zinc-800 px-2 py-1 rounded border border-zinc-700">
+              Elenco {lastRace.elencoId}
+            </span>
+          </div>
+
+          {lastRace.title && (
+            <a
+              href={lastRace.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 p-2.5 mb-6 bg-zinc-950/40 border border-zinc-800 rounded-lg hover:border-accent/50 transition-all max-w-xl"
+            >
+              <div className="p-1.5 bg-red-600/10 rounded-full group-hover:bg-red-600/20 transition-colors">
+                <Youtube className="w-4 h-4 text-red-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[11px] font-bold text-zinc-300 truncate group-hover:text-white transition-colors">{lastRace.title}</div>
+                <div className="flex items-center gap-1 text-[8px] text-zinc-500 font-mono mt-0.5 font-bold">
+                  <span>WATCH ON YOUTUBE</span>
+                  <ExternalLink className="w-2 h-2" />
+                </div>
+              </div>
+            </a>
+          )}
+
+          <div className={`grid grid-cols-2 ${lowerIsBetter ? 'md:grid-cols-4' : 'md:grid-cols-2'} gap-4`}>
+            <div className="p-4 bg-zinc-950/50 border border-zinc-800/50 rounded-xl text-center">
+              <div className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">Posizione</div>
+              <div className={`font-mono text-3xl font-black ${lastRace.position === 1 ? 'text-amber-400' : 'text-white'}`}>
+                {lastRace.position}°<span className="text-sm text-zinc-600">/{lastRace.fieldSize}</span>
+              </div>
+            </div>
+            <div className="p-4 bg-zinc-950/50 border border-zinc-800/50 rounded-xl text-center">
+              <div className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">{config.scoreLabel}</div>
+              <div className="font-mono text-3xl font-black text-white">{lastRace.total}</div>
+            </div>
+            {lowerIsBetter && (
+              <>
+                <div className="p-4 bg-zinc-950/50 border border-zinc-800/50 rounded-xl text-center">
+                  <div className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">+/- Par</div>
+                  <div className={`font-mono text-3xl font-black ${vsParColor(lastRace.vsPar)}`}>{formatVsPar(lastRace.vsPar)}</div>
+                </div>
+                <div className="p-4 bg-zinc-950/50 border border-zinc-800/50 rounded-xl text-center">
+                  <div className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">Hole in One</div>
+                  <div className="font-mono text-3xl font-black text-amber-400">{lastRace.holeInOne}</div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Rivalries Section (Moved Up) */}
       <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 shadow-xl">

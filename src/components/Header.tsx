@@ -8,6 +8,7 @@ import { useGameMode } from '@/lib/game-mode'
 export function Header() {
   const { mode, config, setMode, toggleMode } = useGameMode()
   const melagoodoLogo = '/assets/melagoodo-logo.png'
+  const golfLogo = '/assets/golf-logo.png'
   const isGolf = mode === 'golf'
 
   return (
@@ -52,16 +53,20 @@ export function Header() {
               isGolf ? 'opacity-100' : 'opacity-40 grayscale hover:opacity-70'
             }`}
           >
-            <div className="w-11 h-11 md:w-14 md:h-14 rounded-xl flex items-center justify-center bg-accent/10 border border-accent/40 shrink-0 transition-transform group-hover:scale-110 duration-300">
+            <div className="w-11 h-11 md:w-14 md:h-14 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 duration-300">
               <span className="font-condensed font-black text-base md:text-xl uppercase tracking-tighter text-accent leading-none">
-                GWF
+                <Image
+                  src={golfLogo}
+                  alt="Golf Logo"
+                  width={56}
+                  height={56}
+                  className="object-contain transition-transform group-hover:scale-110 duration-300"
+                />  
               </span>
             </div>
             <div className="hidden sm:flex flex-col text-left leading-none">
               <h2 className="font-condensed font-black text-sm md:text-lg uppercase tracking-tight text-accent leading-[0.95]">
-                Golf With
-                <br />
-                Your Friends
+                GOLFATINE
               </h2>
             </div>
           </button>

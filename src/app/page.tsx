@@ -30,7 +30,8 @@ export default function Home() {
     const minPlaylists = seasons.includes('all') ? config.minPlaylistsAllTime : 0
     return {
       players: processPlayerStats(filtered, minPlaylists, config.lowerIsBetter),
-      playlists: getPlaylistData(filtered, config.lowerIsBetter)
+      // Most recent elenchi first on the dashboard.
+      playlists: getPlaylistData(filtered, config.lowerIsBetter).reverse()
     }
   }, [seasons, allEntries, config.minPlaylistsAllTime, config.lowerIsBetter])
 

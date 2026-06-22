@@ -12,6 +12,19 @@ const getPlayerImage = (normalizedName: string): string | null => {
   return getPlayerImageFromColors(normalizedName)
 }
 
+// The golf CSV carries a "PAR" pseudo-player describing the course standard.
+// It must never appear in standings; it only serves as the over/under-par baseline.
+const isPar = (entry: RaceEntry): boolean => entry.giocatore.trim().toUpperCase() === 'PAR'
+
+/** Map elencoId -> total par strokes for that playlist (0 when no PAR row exists). */
+function getParByElenco(entries: RaceEntry[]): Map<number, number> {
+  const map = new Map<number, number>()
+  for (const entry of entries) {
+    if (isPar(entry)) map.set(entry.elencoId, entry.puntiTotali)
+  }
+  return map
+}
+
 const PLAYER_TAGS: Record<string, string[]> = {
   Marza: ['Marzone'],
   Delux: ['Addobboland'],
@@ -93,42 +106,56 @@ export function filterEntriesBySeason(entries: RaceEntry[], seasons: string[]): 
 }
 
 export function processPlayerStats(entries: RaceEntry[], minPlaylists: number = 0, lowerIsBetter: boolean = false): PlayerStats[] {
+  // PAR is a baseline, not a competitor: keep it for over/under-par math, but
+  // exclude it from every ranking computation.
+  const parByElenco = getParByElenco(entries)
+  const competitors = entries.filter(e => !isPar(e))
+
   const playerMap = new Map<string, RaceEntry[]>()
-  
-  for (const entry of entries) {
+
+  for (const entry of competitors) {
     const normalizedName = normalizePlayerName(entry.giocatore)
     if (!playerMap.has(normalizedName)) {
       playerMap.set(normalizedName, [])
     }
     playerMap.get(normalizedName)!.push(entry)
   }
-  
-  
+
+
   const stats: PlayerStats[] = []
-  
+
   for (const [name, playerEntries] of playerMap) {
     const playerTags = PLAYER_TAGS[name] || [];
     const totalPoints = playerEntries.reduce((sum, e) => sum + e.puntiTotali, 0)
     const playlistsPlayed = playerEntries.length
     const totalRaces = playerEntries.reduce((sum, e) => sum + e.numGare, 0)
     const avgPoints = Number((totalPoints / playlistsPlayed).toFixed(2))
-    
+
     const playlistsWon = playerEntries.filter(e =>
-      isWinnerInPlaylist(e.elencoId, e.puntiTotali, entries, lowerIsBetter)
+      isWinnerInPlaylist(e.elencoId, e.puntiTotali, competitors, lowerIsBetter)
     ).length
-    
+
     const winRate = Number(((playlistsWon / playlistsPlayed) * 100).toFixed(1))
-    
+
     const allScores = playerEntries.map(e => e.punteggiSingoleGare).flat()
     const form = getLast5PlaylistScores(playerEntries)
     const dnfCount = allScores.filter(score => score === 0).length
-    
-    const positions = calculatePositions(playerEntries, entries, lowerIsBetter)
+    const holeInOne = allScores.filter(score => score === 1).length
+
+    // Strokes over/under par per playlist (only where a PAR baseline exists).
+    const vsPar = playerEntries.map(e => {
+      const par = parByElenco.get(e.elencoId)
+      return par === undefined ? 0 : e.puntiTotali - par
+    })
+    const totalVsPar = vsPar.reduce((a, b) => a + b, 0)
+    const avgVsPar = totalRaces > 0 ? Number((totalVsPar / totalRaces).toFixed(2)) : 0
+
+    const positions = calculatePositions(playerEntries, competitors, lowerIsBetter)
     const avgPosition = Number((positions.reduce((a, b) => a + b, 0) / positions.length).toFixed(2))
-    
+
     const playerImage = getPlayerImage(name)
     const images = playerImage ? [playerImage] : []
-    
+
     stats.push({
       name: playerEntries[0].giocatore,
       normalizedName: name,
@@ -146,6 +173,10 @@ export function processPlayerStats(entries: RaceEntry[], minPlaylists: number = 
       elencoIds: playerEntries.map(e => e.elencoId),
       totalRaces,
       dnfCount,
+      holeInOne,
+      totalVsPar,
+      avgVsPar,
+      vsPar,
       images,
       tag: playerTags
     })
@@ -190,14 +221,15 @@ function getLast5PlaylistScores(playerEntries: RaceEntry[]): number[] {
 
 export function getPlaylistData(entries: RaceEntry[], lowerIsBetter: boolean = false): PlaylistData[] {
   const playlistMap = new Map<number, RaceEntry[]>()
-  
+
   for (const entry of entries) {
+    if (isPar(entry)) continue
     if (!playlistMap.has(entry.elencoId)) {
       playlistMap.set(entry.elencoId, [])
     }
     playlistMap.get(entry.elencoId)!.push(entry)
   }
-  
+
   const playlists: PlaylistData[] = []
   
   for (const [elencoId, playlistEntries] of playlistMap) {
