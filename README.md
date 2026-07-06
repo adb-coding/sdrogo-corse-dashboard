@@ -7,6 +7,7 @@ Ringrazio in primo luogo Dread, Rohn, Gabbo, Delux, JTaz, Mollu, e ilMasseo per 
 - Gemini 3 Pro
 - Kimi-k2.5
 - Qwen3-coder-next
+- Claude Opus 4.8
 
 ## 🛠️Tech Stack & Architecture
 - **Core**: Next.js 14 (App Router) per il routing e la gestione del rendering

@@ -19,7 +19,8 @@ const PLAYER_TAGS: Record<string, string[]> = {
   Masseo: ['Ghesboro DC'],
   Rohn: ['Just Fucking Just'],
   Mollu: ['Non Pippo Più'],
-  JTaz: ['Zugu Titti']
+  JTaz: ['Zugu Titti'],
+  Chape: ['King del Tren'],
 };
 
 export function parseCSV(): RaceEntry[] {

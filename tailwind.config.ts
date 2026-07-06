@@ -37,7 +37,9 @@ const config: Config = {
           zamp: '#18afddef',
           frax: '#412005ee',
           johnny: '#e6dddd',
-          hila: '#db4ee7ec'
+          hila: '#db4ee7ec',
+          chape: '#17d6adec',
+          fava: '#8f7900d3',
         },
       },
       fontFamily: {

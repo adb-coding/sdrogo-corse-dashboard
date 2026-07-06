@@ -51,6 +51,8 @@ export const normalizePlayerName = (name: string): string => {
   if (lower.includes('nonsonodread') || lower === 'around dread') return 'Dread'
   if (lower.includes('just marzaa')) return 'Marza'
   if (lower.includes('ilmasseo')) return 'Masseo'
+  if (lower.includes('****')) return 'Fava'
+  if (lower.includes('nbayungchape')) return 'Chape'
   return normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1).toLowerCase()
 }
 
