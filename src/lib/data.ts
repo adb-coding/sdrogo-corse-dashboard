@@ -33,8 +33,16 @@ const PLAYER_TAGS: Record<string, string[]> = {
   Masseo: ['Ghesboro DC'],
   Rohn: ['Just Fucking Just'],
   Mollu: ['Non Pippo Più'],
-  JTaz: ['Zugu Titti '],
+  JTaz: ['Zugu Titti'],
   Chape: ['King del Tren'],
+};
+
+const TEAM_TAGS: Record<string, string[]> = {
+  Delux: ['Jurassic Jew'],
+  Rohn: ['Nimble Gnomes'],
+  Dread: ['Jurassic Jew'],
+  Gabbo: ['Jurassic Jew'],
+  Masseo: ['Nimble Gnomes']
 };
 
 export async function parseCSV(filePath: string): Promise<RaceEntry[]> {
@@ -127,6 +135,7 @@ export function processPlayerStats(entries: RaceEntry[], minPlaylists: number = 
 
   for (const [name, playerEntries] of playerMap) {
     const playerTags = PLAYER_TAGS[name] || [];
+    const teamTags = TEAM_TAGS[name] || [];
     const totalPoints = playerEntries.reduce((sum, e) => sum + e.puntiTotali, 0)
     const playlistsPlayed = playerEntries.length
     const totalRaces = playerEntries.reduce((sum, e) => sum + e.numGare, 0)
@@ -179,7 +188,8 @@ export function processPlayerStats(entries: RaceEntry[], minPlaylists: number = 
       avgVsPar,
       vsPar,
       images,
-      tag: playerTags
+      tag: playerTags,
+      team: teamTags
     })
   }
   

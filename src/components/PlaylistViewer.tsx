@@ -5,7 +5,10 @@ import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, User, Info, BarChart2, Activity, Youtube, ExternalLink } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from 'recharts'
 import { PlaylistData } from '@/types'
-import { getPlayerColor } from '@/lib/colors'
+import { getPlayerColor, normalizePlayerName } from '@/lib/colors'
+import { useGameMode } from '@/lib/game-mode'
+import Link from 'next/link'
+
 
 interface PlaylistViewerProps {
   playlists: PlaylistData[]
@@ -14,6 +17,7 @@ interface PlaylistViewerProps {
 export function PlaylistViewer({ playlists }: PlaylistViewerProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const selected = playlists[selectedIndex]
+  const { mode } = useGameMode()
 
   const maxPointsInPlaylist = selected 
     ? Math.max(...selected.results.map(r => r.totalPoints), 1)
@@ -31,7 +35,8 @@ export function PlaylistViewer({ playlists }: PlaylistViewerProps) {
     })
     
     for (let i = 0; i < numRaces; i++) {
-      const racePoint: { name: string; [key: string]: number | string } = { name: `Gara ${i + 1}` }
+      const prefix = mode === 'golf' ? 'Buca' : 'Gara';
+      const racePoint: { name: string; [key: string]: number | string } = { name: `${prefix} ${i + 1}` }
       selected.results.forEach(result => {
         cumulativePoints[result.player] += result.raceScores[i] ?? 0
         racePoint[result.player] = cumulativePoints[result.player]
@@ -111,19 +116,25 @@ export function PlaylistViewer({ playlists }: PlaylistViewerProps) {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="flex items-center gap-4 p-3 rounded-md bg-zinc-800/30 border border-zinc-700/50 hover:border-zinc-500/50 transition-colors"
+              className="flex items-center gap-4 p-3 rounded-md bg-zinc-800/30 border border-zinc-700/50 hover:border-zinc-500/50 hover:bg-zinc-700/50 transition-colors"
               style={{ borderLeftWidth: '3px', borderLeftColor: getPlayerColor(result.player) }}
             >
               <div className="flex items-center justify-center w-7 h-7 rounded bg-zinc-700/50 font-mono font-bold text-xs text-zinc-400">
                 {result.position}
               </div>
               <div className="flex-1 min-w-0">
-                <div 
+                {/* <div 
                   className="font-condensed font-bold uppercase truncate text-sm tracking-wide"
+                  style={{ color: getPlayerColor(result.player) }}
+                > */}
+                <Link
+                  href={`/drivers?player=${normalizePlayerName(result.player)}`}
+                  className="font-condensed font-bold uppercase truncate text-sm hover:opacity-80 transition-all cursor-pointer block"
                   style={{ color: getPlayerColor(result.player) }}
                 >
                   {result.player}
-                </div>
+                </Link>
+                {/* </div> */}
                 <div className="font-mono text-[9px] text-zinc-500 mt-0.5">
                   {result.raceScores.join(' + ') || 'DNF'}
                 </div>

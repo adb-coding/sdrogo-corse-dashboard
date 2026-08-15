@@ -6,7 +6,7 @@ import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
   title: 'Sdrogo Corse Dashboard 2026',
-  description: 'Racing telemetry dashboard for Sdrogo Corse - GTA V racing championships',
+  description: 'Racing telemetry dashboard for Sdrogo Corse and Golfatine - GTA V & Golf with your Friends championships',
   icons: {
     icon: '/assets/melagoodo-logo.png',
   },

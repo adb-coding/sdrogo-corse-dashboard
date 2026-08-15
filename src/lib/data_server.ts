@@ -23,6 +23,15 @@ const PLAYER_TAGS: Record<string, string[]> = {
   Chape: ['King del Tren'],
 };
 
+const TEAM_TAGS: Record<string, string[]> = {
+  Delux: ['Jurassic Jew'],
+  Rohn: ['Nimble Gnomes'],
+  Dread: ['Jurassic Jew'],
+  Gabbo: ['Jurassic Jew'],
+  Masseo: ['Nimble Gnomes']
+};
+
+
 export function parseCSV(): RaceEntry[] {
   const text = readFileSync('public/sdrogo_corse_chronological.csv', 'utf-8').replace(/^\uFEFF/, '')
   
@@ -91,6 +100,7 @@ export function processPlayerStats(entries: RaceEntry[], minPlaylists: number = 
   
   for (const [name, playerEntries] of playerMap) {
     const playerTags = PLAYER_TAGS[name] || [];
+    const teamTags = TEAM_TAGS[name] || [];
     const totalPoints = playerEntries.reduce((sum, e) => sum + e.puntiTotali, 0)
     const playlistsPlayed = playerEntries.length
     const totalRaces = playerEntries.reduce((sum, e) => sum + e.numGare, 0)
@@ -135,7 +145,8 @@ export function processPlayerStats(entries: RaceEntry[], minPlaylists: number = 
       avgVsPar: 0,
       vsPar: [],
       images,
-      tag: playerTags
+      tag: playerTags,
+      team: teamTags
       })
       }
   

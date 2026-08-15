@@ -1,17 +1,21 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { Header, SeasonFilter } from '@/components'
-import { parseCSV, getPlaylistData, filterEntriesBySeason, getAvailableYears } from '@/lib/data'
-import { getPlayerColor } from '@/lib/colors'
+import { Header, SeasonFilter,  DriverFilter, Footer } from '@/components'
+import { parseCSV, getPlaylistData, filterEntriesBySeason, getAvailableYears, processPlayerStats } from '@/lib/data'
+import { getPlayerColor, normalizePlayerName } from '@/lib/colors'
 import { PlaylistData, RaceEntry } from '@/types'
 import { motion } from 'framer-motion'
 import { Trophy, User, ExternalLink, Youtube } from 'lucide-react'
 import { useGameMode } from '@/lib/game-mode'
+import { CartesianGrid, ResponsiveContainer, LineChart, Tooltip, Line, XAxis, YAxis } from 'recharts'
+import Link from 'next/link'
+
 
 export default function PlaylistsPage() {
   const { config } = useGameMode()
   const [seasons, setSeasons] = useState<string[]>(['all'])
+  const [selectedDrivers, setSelectedDrivers] = useState<string[]>([])
   const [allEntries, setAllEntries] = useState<RaceEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -34,10 +38,25 @@ export default function PlaylistsPage() {
 
   const availableYears = useMemo(() => getAvailableYears(allEntries), [allEntries])
 
+  const availableDrivers = useMemo(() => {
+    const drivers = new Set<string>()
+    allEntries.forEach(entry => {
+      if (entry.giocatore.trim().toUpperCase() !== 'PAR'){
+        drivers.add(entry.giocatore)
+      }
+    })
+    return Array.from(drivers).sort()
+  }, [allEntries])
+
   const playlists = useMemo(() => {
-    const filtered = filterEntriesBySeason(allEntries, seasons)
-    return getPlaylistData(filtered, config.lowerIsBetter)
-  }, [allEntries, seasons, config.lowerIsBetter])
+    const filteredBySeason = filterEntriesBySeason(allEntries, seasons)
+    const allPlaylists = getPlaylistData(filteredBySeason, config.lowerIsBetter)
+    if (selectedDrivers.length === 0 || selectedDrivers.includes('all')) return allPlaylists;
+    return allPlaylists.filter(playlists => {
+      const playerInPlaylist = playlists.results.map(r => r.player)
+      return selectedDrivers.some(driver => playerInPlaylist.includes(driver))
+    })
+  }, [allEntries, seasons, config.lowerIsBetter, selectedDrivers])
 
   useEffect(() => {
     if (selectedId !== null && !playlists.find(p => p.elencoId === selectedId)) {
@@ -73,11 +92,18 @@ export default function PlaylistsPage() {
               Database Completo Gare {seasons.includes('all') ? 'All-Time' : seasons.sort().join(' + ')}
             </p>
           </div>
-          <SeasonFilter 
-            availableYears={availableYears}
-            selectedSeasons={seasons} 
-            onSeasonChange={setSeasons} 
-          />
+          <div className="flex flex-col sm:flex-row gap-4">
+            <DriverFilter
+              availableDrivers={availableDrivers}
+              selectedDrivers={selectedDrivers}
+              onDriverChange={setSelectedDrivers}
+              />
+            <SeasonFilter 
+              availableYears={availableYears}
+              selectedSeasons={seasons} 
+              onSeasonChange={setSeasons} 
+              />
+          </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -180,16 +206,22 @@ export default function PlaylistsPage() {
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: index * 0.05 }}
-                              className="flex items-center gap-4 p-3 rounded-lg bg-zinc-800/50 border-l-2"
+                              className="flex items-center gap-4 p-3 rounded-lg bg-zinc-800/50 border-l-2 hover:bg-zinc-700/50 hover:border-zinc-500/50"
                               style={{ borderLeftColor: getPlayerColor(result.player) }}
                             >
                               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-700 font-mono font-bold text-sm text-white">
                                 {index + 1}
                               </div>
                               <div className="flex-1">
-                                <div className="font-condensed font-bold" style={{ color: getPlayerColor(result.player) }}>
+                                <Link
+                                href={`/drivers?player=${normalizePlayerName(result.player)}`}
+                                className="font-condensed font-bold hover:opactiy-80 transition--all cursor-pointer block"
+                                style={{ color: getPlayerColor(result.player) }}
+                                >
+                                {/* <div className="font-condensed font-bold" style={{ color: getPlayerColor(result.player) }}> */}
                                   {result.player}
-                                </div>
+                                </Link>
+                                {/* </div> */}
                                 <div className="text-xs text-zinc-500 font-mono">
                                   {result.raceScores.join(' + ')}
                                 </div>
@@ -204,7 +236,7 @@ export default function PlaylistsPage() {
                         <h3 className="text-xs uppercase tracking-wider text-zinc-500 mb-4">Distribuzione</h3>
                         <div className="space-y-3">
                           {playlist.results.map((result, index) => {
-                            const maxPoints = playlist.results[0]?.totalPoints || 100
+                            const maxPoints = Math.max(...playlist.results.map(r => r.totalPoints), 1);
                             const percentage = (result.totalPoints / maxPoints) * 100
 
                             return (
@@ -229,6 +261,75 @@ export default function PlaylistsPage() {
                           })}
                         </div>
                       </div>
+                      {(() => {
+                        const raceEvolutionData: any[] = [];
+                        const numRaces = playlist.results[0]?.raceScores.length || 0;
+                        const cumulativePoints: Record<string, number> = {};
+
+                        playlist.results.forEach(r => cumulativePoints[r.player] = 0);
+
+                        for (let i = 0; i < numRaces; i++) {
+                          const prefix = config.id === 'golf' ? 'B' : 'G';
+                          const racePoint: any = { name: `${prefix}${i + 1}` };
+
+                          playlist.results.forEach(r => {
+                            cumulativePoints[r.player] += r.raceScores[i] || 0;
+                            racePoint[r.player] = cumulativePoints[r.player];
+                          });
+                          raceEvolutionData.push(racePoint);
+                        }
+                        
+                        return (
+                          <div className="md:col-span-2">
+                            <h3 className="text-xs uppercase tracking-wider text-zinc-500 mb-4">Andamento Gara</h3>
+                            <div className="h-[350px] w-full bg-zinc-800/20 rounded-xl border border-zinc-800/20 p-4">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={raceEvolutionData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                                  <XAxis 
+                                    dataKey="name" 
+                                    stroke="#52525b" 
+                                    fontSize={10}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    tick={{ fill: '#71717a', fontFamily: 'monospace' }}
+                                  />
+                                  <YAxis 
+                                    stroke="#52525b" 
+                                    fontSize={10}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    tick={{ fill: '#71717a', fontFamily: 'monospace' }}
+                                  />
+                                  <Tooltip 
+                                    contentStyle={{ 
+                                      backgroundColor: '#09090b', 
+                                      border: '1px solid #27272a',
+                                      borderRadius: '8px',
+                                      fontSize: '11px',
+                                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)'
+                                    }}
+                                    labelStyle={{ color: '#a1a1aa', fontWeight: 'bold', marginBottom: '4px' }}
+                                    itemStyle={{ padding: '2px 0' }}
+                                  />
+                                  {playlist?.results.slice(0, 7).map((result) => (
+                                    <Line
+                                      key={result.player}
+                                      type="monotone"
+                                      dataKey={result.player}
+                                      stroke={getPlayerColor(result.player)}
+                                      strokeWidth={2}
+                                      dot={{ r: 3, fill: getPlayerColor(result.player), strokeWidth: 0 }}
+                                      activeDot={{ r: 5, strokeWidth: 0 }}
+                                      animationDuration={1500}
+                                    />
+                                  ))}
+                                </LineChart>
+                              </ResponsiveContainer>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </motion.div>
                 )}
@@ -237,16 +338,20 @@ export default function PlaylistsPage() {
           })}
         </div>
       </div>
-      <footer className="border-t border-zinc-800 mt-16 py-12">
+      {/* <footer className="border-t border-zinc-800 mt-16 py-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-zinc-500 text-[10px] font-mono uppercase tracking-[0.3em]">
             {config.title} Dashboard 2026 &copy; Tutti i video e i contenuti sono di proprietà dei rispettivi creatori
           </p>
           <p className="text-zinc-500 text-[10px] font-mono tracking-[0.3em]">
-          Si ringrazia @antobeviz per la creazione delle statistiche
+            Si ringrazia @antobeviz per la creazione delle statistiche
+          </p>
+          <p className="text-zinc-500 text-[10px] font-mono tracking-[0.3em]">
+            Ultimo aggiornamento classifica il {config.update}
           </p>
         </div>
-      </footer>
+      </footer> */}
+      <Footer />
     </main>
   )
 }

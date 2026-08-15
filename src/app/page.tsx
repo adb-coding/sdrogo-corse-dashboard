@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { Header, TopThree, Leaderboard, PlaylistViewer, SeasonFilter } from '@/components'
+import { Header, TopThree, Leaderboard, PlaylistViewer, SeasonFilter, Footer } from '@/components'
 import { PerformanceChart } from '@/components/PerformanceChart'
 import { parseCSV, processPlayerStats, getPlaylistData, filterEntriesBySeason, getAvailableYears } from '@/lib/data'
 import { PlayerStats, PlaylistData, RaceEntry } from '@/types'
@@ -105,7 +105,7 @@ export default function Home() {
         </section>
       </div>
 
-      <footer className="border-t border-zinc-800 mt-16 py-12">
+      {/* <footer className="border-t border-zinc-800 mt-16 py-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-zinc-500 text-[10px] font-mono uppercase tracking-[0.3em]">
             {config.title} Dashboard 2026 &copy; Tutti i video e i contenuti sono di proprietà dei rispettivi creatori.
@@ -114,7 +114,8 @@ export default function Home() {
           Si ringrazia @antobeviz per la creazione delle statistiche
           </p>
         </div>
-      </footer>
+      </footer> */}
+      <Footer />
     </main>
   )
 }

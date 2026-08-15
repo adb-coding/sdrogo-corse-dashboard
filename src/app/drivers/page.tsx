@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, User, Trophy, Activity, Target, ShieldCheck, X, ExternalLink, Info, ChevronDown, Check, Youtube, Instagram, Twitch, Flag } from 'lucide-react'
-import { Header, SeasonFilter } from '@/components'
+import { Header, SeasonFilter, Footer } from '@/components'
 import { parseCSV, processPlayerStats, getHeadToHead, filterEntriesBySeason, getAvailableYears } from '@/lib/data'
 import { getPlayerColor } from '@/lib/colors'
 import { PlayerStats, RaceEntry } from '@/types'
@@ -15,6 +15,10 @@ import { AreaChart, Area, LineChart, Line, CartesianGrid, XAxis, YAxis, Responsi
 // Strokes relative to par: +n over, -n under, E even.
 const formatVsPar = (v: number): string => (v > 0 ? `+${v}` : v < 0 ? `${v}` : 'E')
 const vsParColor = (v: number): string => (v < 0 ? 'text-green-500' : v > 0 ? 'text-red-400' : 'text-white')
+const TEAM_COLORS: Record<string, string> = {
+  'Jurassic Jew': 'bg-cyan-900/50 text-cyan-300 border-cyan-700',
+  'Nimble Gnomes': 'bg-red-900/50 text-red-300 border-red-700'
+}
 
 export default function DriversPage() {
   const { config } = useGameMode()
@@ -64,6 +68,21 @@ export default function DriversPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredEntries, config.lowerIsBetter, config.minPlaylistsAllTime])
+
+  // Automatically open a driver's profile if linked via URL (e.g., /drivers?player=Dread)
+  useEffect(() => {
+    if (players.length > 0 && typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const playerFromUrl = params.get('player')
+      if (playerFromUrl && !selectedPlayer) {
+        const found = players.find(p => p.normalizedName.toLowerCase() === playerFromUrl.toLowerCase())
+        if (found) {
+          setSelectedPlayer(found)
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [players])
 
   if (loading) {
     return (
@@ -193,7 +212,7 @@ export default function DriversPage() {
                 className="flex items-center gap-2 text-zinc-500 hover:text-white mb-8 transition-colors group font-mono text-[10px] uppercase tracking-widest font-bold"
               >
                 <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-                Torna alla griglia piloti
+                {`Torna alla griglia ${config.nav.drivers.toLowerCase()}`}
               </button>
               
               <DriverProfile player={selectedPlayer} allPlayers={players} allEntries={filteredEntries} />
@@ -201,7 +220,7 @@ export default function DriversPage() {
           )}
         </AnimatePresence>
       </div>
-      <footer className="border-t border-zinc-800 mt-16 py-12">
+      {/* <footer className="border-t border-zinc-800 mt-16 py-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-zinc-500 text-[10px] font-mono uppercase tracking-[0.2em]">
             {config.title} Dashboard 2026 &copy; Tutti i video e i contenuti sono di proprietà dei rispettivi creatori
@@ -210,7 +229,8 @@ export default function DriversPage() {
           Si ringrazia @abyss per la creazione delle statistiche
           </p>
         </div>
-      </footer>
+      </footer> */}
+      <Footer />
     </main>
   )
 }
@@ -223,6 +243,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
   const [isCompareDropdownOpen, setIsCompareDropdownOpen] = useState(false)
   // Golf score-analysis chart: final position or strokes vs par.
   const [analisiMode, setAnalisiMode] = useState<'posizione' | 'par'>('posizione')
+  const [chartMode, setChartMode] = useState<'posizione' | 'par'>('posizione')
 
   const SOCIAL_LINKS: Record<string, { yt?: string; ig?: string; twitch?: string }> = {
     Dread: {
@@ -306,23 +327,46 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
     
     const elencoId = player.elencoIds[selectedElenco.index]
     const playlistEntries = allEntries.filter(e => e.elencoId === elencoId)
+    const { mode } = useGameMode() 
     if (playlistEntries.length === 0) return { data: [], players: [] }
     
     const numGare = playlistEntries[0].numGare
     const data = []
-    const playersInElenco = playlistEntries.map(e => e.giocatore)
+    // const playersInElenco = playlistEntries.map(e => e.giocatore)
     
+    const parEntry = playlistEntries.filter(e => e.giocatore.trim().toUpperCase() === 'PAR');
+    const playersInElenco = playlistEntries.filter(e => e.giocatore.trim().toUpperCase() !== 'PAR').map(e => e.giocatore);
+
     const cumulativePoints: { [key: string]: number } = {}
-    playersInElenco.forEach(p => {
+    playersInElenco.forEach(p  => {
       cumulativePoints[p] = 0
     })
+
+    let cumulativePar = 0;
     
     for (let i = 0; i < numGare; i++) {
-      const racePoint: { name: string; [key: string]: number | string } = { name: `G${i + 1}` }
-      playlistEntries.forEach(entry => {
-        cumulativePoints[entry.giocatore] += (entry.punteggiSingoleGare || [])[i] || 0
-        racePoint[entry.giocatore] = cumulativePoints[entry.giocatore]
+      const prefix = mode === 'golf' ? 'B' : 'G'
+      const racePoint: { name: string; [key: string]: number | string } = { name: `${prefix}${i + 1}` }
+      const currentHolePar = parEntry ? (parEntry.punteggiSingoleGare || [])[i] || 0 : 0;
+      
+      cumulativePar += currentHolePar;
+      
+      playersInElenco.forEach(playerName => {
+        const entry = playlistEntries.find(e => e.giocatore === playerName)
+        const shot = (entry?.punteggiSingoleGare || [])[i] || 0
+        cumulativePoints[playerName] += shot
+
+        if (chartMode === 'par' && mode === 'golf' && parEntry) {
+          racePoint[playerName] = shot - currentHolePar;
+        } else {
+          racePoint[playerName] = cumulativePoints[playerName];
+        }
       })
+
+      // playlistEntries.forEach(entry => {
+      //   cumulativePoints[entry.giocatore] += (entry.punteggiSingoleGare || [])[i] || 0
+      //   racePoint[entry.giocatore] = cumulativePoints[entry.giocatore]
+      // })
       data.push(racePoint)
     }
     
@@ -335,7 +379,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
         return b.localeCompare(a)
       })
     }
-  }, [selectedElenco, player, allEntries])
+  }, [selectedElenco, player, allEntries, chartMode])
 
   const playlistInfo = useMemo(() => {
     if (!selectedElenco) return null
@@ -503,6 +547,15 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                 {t}
               </span>
             ))}
+            {player.team.map(tag => {
+              const colorClasses = TEAM_COLORS[tag];
+              return(
+                <span key={tag} className={`px-3 py-1 rounded text-[10px] font-mono font-bold uppercase tracking-widest border ${colorClasses}`}>
+                  {tag}
+                </span>
+              )
+            }
+            )}
           </div>
         </div>
       </div>
@@ -963,6 +1016,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-10 gap-2">
           {player.raceScores.map((scores, index) => {
             const total = scores.reduce((a, b) => a + b, 0)
+            const position = player.positions[index]
             const elencoId = player.elencoIds[index]
             const isSelected = selectedElenco?.id === elencoId
             
@@ -981,6 +1035,9 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                   }`}>E{index + 1}</span>
                   <span className={`font-mono font-black text-lg transition-colors ${
                     isSelected ? 'text-white' : 'text-white group-hover:text-accent'
+                  }`}>{position}</span>
+                  <span className={`text-[12px] font-mono font-bold uppercase transition-colors ${
+                    isSelected ? 'text-accent' : 'text-zinc-600 group-hover:text-accent'
                   }`}>{total}</span>
                 </div>
 
@@ -993,7 +1050,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                       className="col-span-full mt-4 mb-8 pt-8 border-t border-zinc-800 overflow-hidden"
                     >
                       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                        <div>
+                        <div className="flex flex-col items-start">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="px-2 py-0.5 bg-accent/10 text-accent rounded text-[10px] font-mono font-bold uppercase tracking-widest border border-accent/20">
                               Telemetria Elenco {selectedElenco.index + 1}
@@ -1002,26 +1059,45 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                           <h4 className="text-xl font-black uppercase tracking-tighter text-white leading-tight">
                             {playlistInfo?.videoTitle || 'Analisi Evoluzione Gara'}
                           </h4>
+                          
+
                           {playlistInfo?.videoLink && (
                             <a 
-                              href={playlistInfo.videoLink} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 mt-2 text-zinc-500 hover:text-accent transition-colors group text-[10px] font-mono font-bold uppercase tracking-widest"
+                            href={playlistInfo.videoLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 mt-2 text-zinc-500 hover:text-accent transition-colors group text-[10px] font-mono font-bold uppercase tracking-widest"
                             >
                               <ExternalLink className="w-3 h-3" />
                               Guarda il video integrale
                             </a>
                           )}
+                          
+                          <div className="flex flex-col items-start md:items-end gap-3 w-full md:w-auto mt-4 md:mt-0">
+                            
+                            <div className="flex flex-wrap gap-2 justify-start md:justify-end">
+                              {multiEvolutionData.players.slice(0, 5).map(p => (
+                                <div key={p} className="flex items-center gap-1.5 px-2 py-1 bg-zinc-950/50 border border-zinc-800 rounded text-[9px] font-bold uppercase tracking-wider">
+                                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: getPlayerColor(p) }} />
+                                  <span className="text-zinc-400">{p}</span>
+                                </div>
+                              ))}
+
+                            {lowerIsBetter && (
+                              <div className='flex bg-zinc-800 p-1 rounded-md border border-zinc-700 self-start sm:self-auto'>
+                                <button onClick={() => setChartMode('posizione')} className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest transition-all ${chartMode === 'posizione' ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                                  style={chartMode === 'posizione' ? { backgroundColor: playerColor } : {}}>
+                                  Totale
+                                </button>
+                                <button onClick={() => setChartMode('par')} className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest transition-all ${chartMode === 'par' ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                                  style={chartMode === 'par' ? { backgroundColor: playerColor } : {}}>
+                                  Per Buca
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                         
-                        <div className="flex flex-wrap gap-2">
-                          {multiEvolutionData.players.slice(0, 5).map(p => (
-                            <div key={p} className="flex items-center gap-1.5 px-2 py-1 bg-zinc-950/50 border border-zinc-800 rounded text-[9px] font-bold uppercase tracking-wider">
-                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: getPlayerColor(p) }} />
-                              <span className="text-zinc-400">{p}</span>
-                            </div>
-                          ))}
                         </div>
                       </div>
 

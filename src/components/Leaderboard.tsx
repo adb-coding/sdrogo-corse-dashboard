@@ -7,6 +7,7 @@ import { PlayerStats } from '@/types'
 import { getPlayerColor } from '@/lib/colors'
 import { useGameMode } from '@/lib/game-mode'
 import { motion } from 'framer-motion'
+import Link from 'next/link'
 
 type SortMetric = 'totalPoints' | 'avgPoints' | 'playlistsWon' | 'playlistsPlayed' | 'winRate' | 'dnfCount' | 'avgPosition' | 'totalVsPar' | 'avgVsPar' | 'holeInOne'
 
@@ -166,7 +167,12 @@ export function Leaderboard({ players, onPlayerClick, highlightPlayer }: Leaderb
                       className="font-condensed font-bold uppercase truncate text-sm md:text-base"
                       style={{ color: getPlayerColor(player.normalizedName) }}
                     >
+                    <Link
+                      href={`/drivers?player=${player.normalizedName}`}
+                      className="font-condensed font-bold uppercase tracking-tighter text-sm md:text-base transition-colors block cursor-pointer hover:opacity-80"
+                    >
                       {player.normalizedName}
+                    </Link>
                     </span>
                     <span className="font-mono font-black text-xs md:text-sm text-white md:ml-auto bg-zinc-800 md:bg-transparent px-1.5 py-0.5 rounded md:rounded-none w-fit">
                       {player.totalPoints} <span className="text-[8px] text-zinc-500 font-bold md:hidden uppercase">{config.scoreLabel}</span>

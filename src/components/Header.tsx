@@ -33,7 +33,7 @@ export function Header() {
               />
             </div>
             <div className="hidden sm:flex flex-col text-left leading-none">
-              <h1 className="font-condensed font-bold text-lg md:text-2xl uppercase tracking-wider text-white leading-none">
+              <h1 className="font-condensed font-black text-lg md:text-2xl uppercase tracking-tight text-accent leading-none">
                 Sdrogo Corse
               </h1>
               <span className="text-[9px] md:text-[10px] text-zinc-500 font-mono tracking-[0.3em] mt-1">
@@ -65,9 +65,13 @@ export function Header() {
               </span>
             </div>
             <div className="hidden sm:flex flex-col text-left leading-none">
-              <h2 className="font-condensed font-black text-sm md:text-lg uppercase tracking-tight text-accent leading-[0.95]">
+              {/* <h1 className="font-condensed font-black text-sm md:text-lg uppercase tracking-tight text-accent leading-[0.95]"> */}
+              <h1 className="font-condensed font-black text-lg md:text-2xl uppercase tracking-tight text-accent leading-none">
                 GOLFATINE
-              </h2>
+              </h1>
+              <span className="text-[9px] md:text-[10px] text-zinc-500 font-mono tracking-[0.3em] mt-1">
+                DASHBOARD 2026
+              </span>
             </div>
           </button>
         </div>

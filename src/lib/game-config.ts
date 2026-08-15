@@ -23,6 +23,8 @@ export interface GameConfig {
   playerSingular: string
   /** Hex accents for Recharts / inline styles (mirror the CSS vars in globals.css) */
   colors: { accent: string; accentSecondary: string }
+  // Date of last update of the standing
+  update: string
 }
 
 export const GAME_CONFIGS: Record<GameMode, GameConfig> = {
@@ -38,10 +40,11 @@ export const GAME_CONFIGS: Record<GameMode, GameConfig> = {
     nav: { home: 'Classifica', playlists: 'Elenchi', drivers: 'Piloti' },
     playerSingular: 'Pilota',
     colors: { accent: '#ef4444', accentSecondary: '#f97316' },
+    update: '10-08-2026'
   },
   golf: {
     id: 'golf',
-    csvPath: '/golf_with_friends.csv',
+    csvPath: '/golf_with_friends_grid.csv',
     lowerIsBetter: true,
     title: 'Golfatine',
     subtitle: 'Statistiche Ufficiali del Tour',
@@ -51,6 +54,7 @@ export const GAME_CONFIGS: Record<GameMode, GameConfig> = {
     nav: { home: 'Classifica', playlists: 'Elenchi', drivers: 'Golfisti' },
     playerSingular: 'Golfista',
     colors: { accent: '#22c55e', accentSecondary: '#06b6d4' },
+    update: '14-08-2026',
   },
 }
 
