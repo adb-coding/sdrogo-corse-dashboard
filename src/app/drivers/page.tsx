@@ -334,7 +334,7 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
     const data = []
     // const playersInElenco = playlistEntries.map(e => e.giocatore)
     
-    const parEntry = playlistEntries.filter(e => e.giocatore.trim().toUpperCase() === 'PAR');
+    const parEntry = playlistEntries.find(e => e.giocatore.trim().toUpperCase() === 'PAR');
     const playersInElenco = playlistEntries.filter(e => e.giocatore.trim().toUpperCase() !== 'PAR').map(e => e.giocatore);
 
     const cumulativePoints: { [key: string]: number } = {}

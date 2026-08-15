@@ -25,6 +25,7 @@ export interface PlayerStats {
   vsPar: number[]
   images: string[]
   tag: string[]
+  team: string[]
 }
 
 export interface PlaylistData {
