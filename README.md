@@ -1,10 +1,15 @@
 # Classifica Sdrogo Corse
-**Sdrogo Corse Dashboard** è una piattaforma fan made per tenere traccia della classifica delle sdrogo corse.
 
-Ringrazio in primo luogo Dread, Rohn, Gabbo, Delux, JTaz, Mollu, e ilMasseo per i contenuti che portano, ma anche @antobeviz per il meticoloso lavoro nell'aver raccolto e tenuto traccia delle statistiche e aver reso possibile la creazione di questo progetto.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=nextdotjs&logoColor=white)
+
+**Sdrogo Corse Dashboard** è una piattaforma fan made per tenere traccia della classifica delle sdrogo corse e delle Golfatine.
+
+Ringrazio in primo luogo Dread, Rohn, Gabbo, Delux, JTaz, Mollu, ilMasseo e gli altri di melagoodo per i contenuti che portano e per averci tenuto compagnia per diversi anni.
 
 **Note on Development**: il progetto è stato realizzato tramite *Vibe-coding*, focalizzandolo sulla creazione di un prodotto data-driven in un tempo relativamente breve. Sono stati utilizzati i seguenti LLM: 
 - Gemini 3 Pro
+- Gemini 3.1 Pro
 - Kimi-k2.5
 - Qwen3-coder-next
 - Claude Opus 4.8
@@ -27,7 +32,8 @@ La pagina principale che riporta la classifica delle sdrogo corse.
 
 ### 📈2. Elenchi
 Raccolta di tutti gli elenchi giocati, con la possibilità di cliccare nel dettaglio un elenco e vedere la distribuzione dei punti.
-### 🏎️3. Sdrogo Piloti
+
+### 🏎️3. Sdrogo Piloti/Golfisti
 Permette di vedere le statistiche per ogni *Sdrogo Pilota* nel dettaglio:
 - riassunto delle statistiche principali 
 - serie storica dei punteggi nei vari elenchi
@@ -40,6 +46,7 @@ Permette di vedere le statistiche per ogni *Sdrogo Pilota* nel dettaglio:
 - Dettaglio degli elenchi giocati
 - Scontro Testa-a-Testa con gli altri giocatori, con la possiblità di vedere il confronto diretto dello *Sdrogo Potenziale* sul radar chart.
 
+
 ### 📱Versione Mobile
 
 La versione mobile potrebbe avere bug grafici e non ossere ottimizata su tutti i dispositivi, in quanto lo sviluppo si è concentrato principalmente sulla versione desktop. 
@@ -50,7 +57,13 @@ La differenza principale sta nella creazione di una barra di navigazione per nav
 
 Ho inserito la classifica All-time estrapolando i frame delle classifiche da alcuni dei video reperibili nelle playlist dei canali attraverso una rete neurale creata con PyTorch. I frame estratti sono poi stati sottoposti a un modello LLM per estrarre le classifiche in modo automatico, quindi inevitabilmente sono presenti degli errori in alcuni elenchi.
 
-Nei prossimi push fornirò maggiori dettagli nel framework e nel codice utilizzato per estrarre questi frame e il modello utilizzato.
+Maggiori dettagli nel codice e nel metodo utilizzato sono nella documentazione [Sdrogo-Corse-Extraction](/scripts/sdrogo-corse-extraction/README.md) 
+
+### ⛳Golfatine
+
+Ho aggiunto gli elenchi e i dati delle golfatine, data la loro popolarità e competitività all'interno dei video. Ho raccolto tutti i video all'interno di una playlist, per poi estrarre i dati tramite OCR. Maggiori dettagli sono disponibili in [Golf-Extraction](/scripts/golf-extraction/README.md).
+
+Le funzionalità e la struttura del sito rimangono le stesse di quelle utilizzate per le sdrogo corse, con alcuni accorgimenti grafici per l'adatattamento.
 
 
 ## 📂Struttura del Progetto
@@ -64,6 +77,9 @@ Nei prossimi push fornirò maggiori dettagli nel framework e nel codice utilizza
 │   │   ├── data.ts   # Client-side data fetching & filtering
 │   │   ├── data_server.ts # Server-side data engine
 │   └── types         # Interface TypeScript globali
+├── scripts
+│   ├── golf-extraction # Estrazione delle golfatine
+│   └── sdrogo-corse-extraction # Estrazione delle sdrogo corse
 ```
 
 ## 🚀Riproduzione del progetto
@@ -72,7 +88,7 @@ Nei prossimi push fornirò maggiori dettagli nel framework e nel codice utilizza
 - npm / pnpm / yarn
 
 **Installazione**
-1. Clona la repositori
+1. Clona la repo
 ``` bash
 git clone https://github.com/tuo-username/sdrogo-corse-dashboard.git
 ```

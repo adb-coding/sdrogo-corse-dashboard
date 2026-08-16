@@ -58,7 +58,7 @@ export function Footer() {
                         <a href="#" className="text-zinc-600 hover:text-pink-500 transition-colors"><Instagram className="w-4 h-4" /></a>
                         <a href="#" className="text-zinc-600 hover:text-white transition-colors"><Github className="w-4 h-4" /></a> */}
                         {/* </div> */}
-                        {/* <h4 className="font-mono font-bold text-xs text-zinc-400 uppercase tracking-widest">
+                        <h4 className="font-mono font-bold text-xs text-zinc-400 uppercase tracking-widest">
                         Changelog
                         </h4>
                         <p className="text-zinc-500 text-[10px] font-mono uppercase tracking-widest">
@@ -67,7 +67,7 @@ export function Footer() {
                                 Patch Notes
                                 </Link>
                             </li>
-                        </p> */}
+                        </p>
                     </div>
                 </div>
 
