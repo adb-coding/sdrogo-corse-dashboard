@@ -1,0 +1,6 @@
+yt-dlp 
+opencv-python
+pytesseract
+numpy
+packaging
+pillow
