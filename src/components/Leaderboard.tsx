@@ -142,7 +142,8 @@ export function Leaderboard({ players, onPlayerClick, highlightPlayer }: Leaderb
               key={player.normalizedName}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
+              // Cap the cascade so long lists don't animate for seconds.
+              transition={{ delay: Math.min(index, 10) * 0.03, duration: 0.25 }}
               onClick={() => onPlayerClick?.(player)}
               style={{ gridTemplateColumns: gridTemplate }}
               className={`grid gap-2 md:gap-4 px-4 md:px-6 py-4 driver-card cursor-pointer transition-all hover:bg-zinc-800/50 border-l-2 ${

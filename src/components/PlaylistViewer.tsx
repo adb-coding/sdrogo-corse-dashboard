@@ -115,7 +115,7 @@ export function PlaylistViewer({ playlists }: PlaylistViewerProps) {
               key={result.player}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
+              transition={{ delay: Math.min(index, 10) * 0.03, duration: 0.25 }}
               className="flex items-center gap-4 p-3 rounded-md bg-zinc-800/30 border border-zinc-700/50 hover:border-zinc-500/50 hover:bg-zinc-700/50 transition-colors"
               style={{ borderLeftWidth: '3px', borderLeftColor: getPlayerColor(result.player) }}
             >
@@ -161,7 +161,7 @@ export function PlaylistViewer({ playlists }: PlaylistViewerProps) {
                     className="flex flex-col items-center gap-3 flex-1 h-full justify-end group relative"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
+                    transition={{ delay: Math.min(index, 10) * 0.03, duration: 0.25 }}
                   >
                     <div className="font-mono text-xs font-bold text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity mb-auto">
                       {result.totalPoints}
@@ -234,7 +234,7 @@ export function PlaylistViewer({ playlists }: PlaylistViewerProps) {
                   strokeWidth={2}
                   dot={{ r: 3, fill: getPlayerColor(result.player), strokeWidth: 0 }}
                   activeDot={{ r: 5, strokeWidth: 0 }}
-                  animationDuration={1500}
+                  animationDuration={600}
                 />
               ))}
             </LineChart>

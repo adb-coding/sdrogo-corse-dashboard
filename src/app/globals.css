@@ -64,7 +64,7 @@ body {
 
 .glass-effect {
   background: rgba(24, 24, 27, 0.8);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(6px);
   border: 1px solid rgba(39, 39, 42, 0.5);
 }
 
@@ -82,12 +82,25 @@ body {
 }
 
 .driver-card {
-  transition: all 0.3s ease;
+  /* Only animate transform (compositor-only, no repaint). */
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .driver-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 30px rgb(var(--accent) / 0.2);
+}
+
+/* Kill all non-essential motion for users who ask for it, and cap the cost
+   of framer entrance animations on weak devices. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 .rank-1 {

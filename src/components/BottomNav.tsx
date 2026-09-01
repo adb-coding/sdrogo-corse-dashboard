@@ -18,7 +18,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 md:hidden w-[90%] max-w-sm">
-      <div className="bg-zinc-900/60 backdrop-blur-lg border border-zinc-800/50 rounded-2xl p-2 flex items-center justify-around shadow-2xl shadow-black/50">
+      <div className="bg-zinc-900/80 backdrop-blur-sm border border-zinc-800/50 rounded-2xl p-2 flex items-center justify-around shadow-2xl shadow-black/50">
         {navItems.map((item) => {
           const isActive = pathname === item.href
           
