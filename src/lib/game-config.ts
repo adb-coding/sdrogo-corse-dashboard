@@ -54,7 +54,7 @@ export const GAME_CONFIGS: Record<GameMode, GameConfig> = {
     nav: { home: 'Classifica', playlists: 'Elenchi', drivers: 'Golfisti' },
     playerSingular: 'Golfista',
     colors: { accent: '#22c55e', accentSecondary: '#06b6d4' },
-    update: '14-08-2026',
+    update: '01-09-2026',
   },
 }
 

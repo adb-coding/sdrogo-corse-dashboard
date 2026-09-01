@@ -9,6 +9,9 @@ import json
 import yt_dlp
 
 
+JSON_PATH = os.path.join(os.getcwd(), 'data_img.json')
+
+
 def estrai_classifica(image_path):
 
     img = cv2.imread(image_path)
@@ -105,14 +108,20 @@ def estrai_classifica(image_path):
     # return classifica_strutturata
 
 
-def process_playlist(playlist_url):
+def process_playlist(playlist_url, data_file):
     # Handle multiple URLs: 
     # 1. Strip brackets and quotes (in case a Python list is pasted)
     # 2. Split by comma, space, or newline
     clean_input = playlist_url.replace('[', '').replace(']', '').replace("'", "").replace('"', '').replace(',', ' ')
     urls = [u.strip() for u in clean_input.split() if u.strip()]
+
+    if os.path.exists(data_file):
+        with open(data_file, "r") as f:
+            data_json = json.load(f)
     
-    data = {}
+    data = data_json
+
+    already_extracted_videos = []
 
     for url in urls:
         ydl_opts = {
@@ -149,9 +158,9 @@ def process_playlist(playlist_url):
             data[f"elenco_{str(counter)}"] = video_info
         
             # CHECK IF THE VIDEO HAS ALREADY BEEN SAVED (Using ID)
-            # if any(video_id in x for x in existing_files):
-            #     print(f"[{counter}/{len(entries)}] Skipping: {video_title} (ID: {video_id} already exists)")
-            #     continue
+            if any(video_id in x for x in already_extracted_videos):
+                print(f"[{counter}/{len(entries)}] Skipping: {video_title} (ID: {video_id} already exists)")
+                continue
 
             print(f"[{counter}/{len(entries)}] Processing: {video_title}")
     
@@ -179,7 +188,7 @@ def get_video_info(video_url, elenco_id):
 # video_info = get_video_info("https://www.youtube.com/watch?v=5S6Dq7LAFNA&list=PLNn6OQTRPzc0&index=43", 43)
 # print(video_info)
 
-data = process_playlist("https://www.youtube.com/playlist?list=PLNiSDL1xBMBM")
+data = process_playlist("https://www.youtube.com/playlist?list=PLNiSDL1xBMBM", JSON_PATH)
 # print(data)
 
 with open("data_img.json","w") as f:
