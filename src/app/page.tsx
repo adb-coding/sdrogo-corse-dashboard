@@ -1,9 +1,23 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { Header, TopThree, Leaderboard, PlaylistViewer, SeasonFilter, Footer } from '@/components'
-import { PerformanceChart } from '@/components/PerformanceChart'
+import dynamic from 'next/dynamic'
+import { Header, TopThree, Leaderboard, SeasonFilter, Footer, LoadingScreen } from '@/components'
 import { parseCSV, processPlayerStats, getPlaylistData, filterEntriesBySeason, getAvailableYears } from '@/lib/data'
+
+// Recharts is heavy; keep it out of the initial bundle. These two sections sit
+// below the fold, so load them on demand. Animations are unchanged once mounted.
+const chartFallback = (
+  <div className="w-full h-80 bg-zinc-900/50 border border-zinc-800 rounded-xl animate-pulse" />
+)
+const PerformanceChart = dynamic(
+  () => import('@/components/PerformanceChart').then(m => m.PerformanceChart),
+  { ssr: false, loading: () => chartFallback }
+)
+const PlaylistViewer = dynamic(
+  () => import('@/components/PlaylistViewer').then(m => m.PlaylistViewer),
+  { ssr: false, loading: () => chartFallback }
+)
 import { PlayerStats, PlaylistData, RaceEntry } from '@/types'
 import { useGameMode } from '@/lib/game-mode'
 
@@ -38,15 +52,7 @@ export default function Home() {
   const { players, playlists } = filteredData
 
   if (loading) {
-    return (
-      <main className="min-h-screen bg-zinc-950 pt-20">
-        <Header />
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="h-64 bg-zinc-900 border border-zinc-800 rounded-xl animate-pulse mb-12" />
-          <div className="h-96 bg-zinc-900 border border-zinc-800 rounded-xl animate-pulse" />
-        </div>
-      </main>
-    )
+    return <LoadingScreen />
   }
 
   return (

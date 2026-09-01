@@ -8,13 +8,22 @@ import { useGameMode } from '@/lib/game-mode'
 export function Header() {
   const { mode, config, setMode, toggleMode } = useGameMode()
   const melagoodoLogo = '/assets/melagoodo-logo.png'
+  const gta5Logo = '/assets/gta5-logo.png'
   const golfLogo = '/assets/golf-logo.png'
   const isGolf = mode === 'golf'
 
   return (
     <header className="fixed top-0 w-full z-50 glass-effect border-b border-zinc-800">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 md:gap-4 min-w-0">
+        <div className="flex items-center gap-3 md:gap-4 min-w-0">
+          <Image
+            src={melagoodoLogo}
+            alt="Melagoodo Logo"
+            width={64}
+            height={64}
+            className="object-contain transition-transform group-hover:scale-110 duration-300"
+          />
+          <div className="w-px h-16 bg-zinc-700 shrink-0" />
           {/* Racing brand */}
           <button
             onClick={() => setMode('racing')}
@@ -25,17 +34,17 @@ export function Header() {
           >
             <div className="w-11 h-11 md:w-14 md:h-14 flex items-center justify-center relative shrink-0">
               <Image
-                src={melagoodoLogo}
+                src={gta5Logo}
                 alt="Melagoodo Logo"
-                width={56}
-                height={56}
+                width={42}
+                height={42}
                 className="object-contain transition-transform group-hover:scale-110 duration-300"
               />
             </div>
-            <div className="hidden sm:flex flex-col text-left leading-none">
-              <h1 className="font-condensed font-black text-lg md:text-2xl uppercase tracking-tight text-accent leading-none">
+            <div className="hidden lg:flex flex-col text-left leading-none">
+              <h2 className="font-condensed font-black text-lg md:text-xl uppercase tracking-tight text-accent leading-none">
                 Sdrogo Corse
-              </h1>
+              </h2>
               <span className="text-[9px] md:text-[10px] text-zinc-500 font-mono tracking-[0.3em] mt-1">
                 DASHBOARD 2026
               </span>
@@ -58,17 +67,16 @@ export function Header() {
                 <Image
                   src={golfLogo}
                   alt="Golf Logo"
-                  width={56}
-                  height={56}
+                  width={42}
+                  height={42}
                   className="object-contain transition-transform group-hover:scale-110 duration-300"
                 />  
               </span>
             </div>
-            <div className="hidden sm:flex flex-col text-left leading-none">
-              {/* <h1 className="font-condensed font-black text-sm md:text-lg uppercase tracking-tight text-accent leading-[0.95]"> */}
-              <h1 className="font-condensed font-black text-lg md:text-2xl uppercase tracking-tight text-accent leading-none">
+            <div className="hidden lg:flex flex-col text-left leading-none">
+              <h2 className="font-condensed font-black text-lg md:text-xl uppercase tracking-tight text-accent leading-none">
                 GOLFATINE
-              </h1>
+              </h2>
               <span className="text-[9px] md:text-[10px] text-zinc-500 font-mono tracking-[0.3em] mt-1">
                 DASHBOARD 2026
               </span>

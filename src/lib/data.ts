@@ -54,6 +54,8 @@ export async function parseCSV(filePath: string): Promise<RaceEntry[]> {
     Papa.parse(cleanText, {
       header: true,
       skipEmptyLines: true,
+      // Parse off the main thread so large CSVs don't freeze the UI/loader.
+      worker: true,
       complete: (results) => {
         const entries: RaceEntry[] = []
         

@@ -6,7 +6,16 @@ import { GitCommit, Star, Bug } from 'lucide-react'
 
 const CHANGELOG = [
   {
-    version: "2.0.0",
+    version: "2.0.2",
+    date: "01-09-2026",
+    title: "Loading Page and Lighter Loading",
+    features: [
+      "Aggiunta schermata di caricamento",
+      "Implementato utilizzo di Papa.parse per caricamento più leggero"
+    ]
+  },
+  {
+    version: "2.0.1",
     date: "15-08-2026",
     title: "Driver Links & UI Functionalities",
     features: [
@@ -17,6 +26,31 @@ const CHANGELOG = [
     fixes: [
       "Fixato bug barre della distribuzione nella modalità Golf"
     ]
+  },
+    {
+    version: "2.0.0",
+    date: "15-04-2026",
+    title: "Golfatine",
+    features: [
+      "Aggiunto l'elenco e le statistiche delle Golfatine",
+      "Toggle nell'intestazione per cambiare tra Sdrogo Corse e Sdrogo Golfatine",
+      "Comparazione Testa-a-testa nella pagina piloti"
+    ]
+  },
+
+  {
+   version: "1.1.0",
+    date: "15-03-2026",
+    title: "SDROGO CORSE ALL-TIME",
+    features: [
+      "Inserito line-chart nella pagina iniziale",
+      "Aggiunto classifica all-time",
+      "Implementato utilizzo del CNN per estrazione sdrogo corse all-time"
+    ],
+    fixes: [
+      "Migliorata UI e navigazione nelle pagine",
+      "Migliorato podio pagina iniziale"
+    ] 
   }
 ]
 

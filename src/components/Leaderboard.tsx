@@ -55,7 +55,7 @@ export function Leaderboard({ players, onPlayerClick, highlightPlayer }: Leaderb
   const metricColumns = config.lowerIsBetter ? GOLF_COLUMNS : RACING_COLUMNS
   const showForm = !config.lowerIsBetter
   // Golf's headline metric is average strokes; racing's is total points.
-  const defaultMetric: SortMetric = config.lowerIsBetter ? 'avgPoints' : 'totalPoints'
+  const defaultMetric: SortMetric = config.lowerIsBetter ? 'playlistsWon' : 'playlistsWon'
   const [sortMetric, setSortMetric] = useState<SortMetric>(defaultMetric)
   const [sortAsc, setSortAsc] = useState(false)
 
