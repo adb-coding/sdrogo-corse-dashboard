@@ -378,7 +378,11 @@ def main():
     ap.add_argument("--cpu", action="store_true")
     ap.add_argument("--dump-dir", default=None,
                     help="salva immagini annotate con griglia e letture")
+    ap.add_argument("--data", default="C:\Coding\sdrogo_corse\public\golf_with_friends_grid.csv", help="csv contenente gare già processate")
     args = ap.parse_args()
+
+    origin_df = pd.read_csv(args.data)
+    processed_video = list(origin_df['video_id'])
 
     with open(args.json, "r", encoding="utf-8") as f:
         metadata = json.load(f)
@@ -391,6 +395,10 @@ def main():
     for item in metadata:
         if args.only and item != args.only:
             continue
+
+        if metadata.get(item).get("video_id") in processed_video:
+            continue
+
         print(f"Analizzo: {item}.png ...")
         a = analizza_immagine(reader, os.path.join(args.images, item + ".png"),
                               debug=args.debug)
@@ -436,7 +444,9 @@ def main():
                 "da_verificare": nota,
             })
 
-    pd.DataFrame(record).to_csv(args.out, index=False, encoding="utf-8")
+    record = pd.DataFrame(record)
+    final_df = pd.concat([origin_df, record])
+    final_df.to_csv(args.out, index=False, encoding="utf-8")
     print(f"\n[v] Completato: {len(record)} righe -> {args.out}")
     print(f"    righe da verificare a mano: {da_rivedere}")
 
