@@ -40,7 +40,7 @@ export const GAME_CONFIGS: Record<GameMode, GameConfig> = {
     nav: { home: 'Classifica', playlists: 'Elenchi', drivers: 'Piloti' },
     playerSingular: 'Pilota',
     colors: { accent: '#ef4444', accentSecondary: '#f97316' },
-    update: '10-08-2026'
+    update: '10-09-2026'
   },
   golf: {
     id: 'golf',
@@ -54,7 +54,7 @@ export const GAME_CONFIGS: Record<GameMode, GameConfig> = {
     nav: { home: 'Classifica', playlists: 'Elenchi', drivers: 'Golfisti' },
     playerSingular: 'Golfista',
     colors: { accent: '#22c55e', accentSecondary: '#06b6d4' },
-    update: '01-09-2026',
+    update: '09-09-2026',
   },
 }
 
