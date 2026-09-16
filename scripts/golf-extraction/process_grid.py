@@ -379,6 +379,7 @@ def main():
     ap.add_argument("--dump-dir", default=None,
                     help="salva immagini annotate con griglia e letture")
     ap.add_argument("--data", default="C:\Coding\sdrogo_corse\public\golf_with_friends_grid.csv", help="csv contenente gare già processate")
+    ap.add_argument("--all", action="store_true", help="process all the images")
     args = ap.parse_args()
 
     origin_df = pd.read_csv(args.data)
@@ -431,7 +432,6 @@ def main():
             if nota:
                 da_rivedere += 1
             record.append({
-                "elenco_id": metadata[item].get("elenco_id", ""),
                 "video_owner": metadata[item].get("video_owner", ""),
                 "giocatore": nome,
                 "punti_totali": totale,
@@ -445,7 +445,23 @@ def main():
             })
 
     record = pd.DataFrame(record)
-    final_df = pd.concat([origin_df, record])
+    final_df = pd.concat([origin_df, record], ignore_index=True)
+
+    order = {
+        vid: i
+        for i, vid in enumerate(
+            sorted(
+                final_df['video_id'].unique(),
+                key=lambda v: (
+                    str(metadata.get(v, {}).get("date","")),
+                    metadata.get(v, {}).get("playlist_index",0),
+                ),
+            ),
+            start=1,
+        )
+    }
+    final_df['elenco_id'] = final_df['video_id'].map(order)
+    final_df.sort_values(by='elenco_id', kind="stable").reset_index(drop=True)
     final_df.to_csv(args.out, index=False, encoding="utf-8")
     print(f"\n[v] Completato: {len(record)} righe -> {args.out}")
     print(f"    righe da verificare a mano: {da_rivedere}")

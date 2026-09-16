@@ -154,26 +154,29 @@ def process_playlist(playlist_url, data_file):
             if not video_url or 'youtube.com' not in video_url:
                 video_url = f"https://www.youtube.com/watch?v={video_id}"
 
-            video_info = get_video_info(video_url=video_url, elenco_id=counter)
-            data[f"elenco_{str(counter)}"] = video_info
         
             # CHECK IF THE VIDEO HAS ALREADY BEEN SAVED (Using ID)
-            if any(video_id in x for x in already_extracted_videos):
+            if video_id in data:
                 print(f"[{counter}/{len(entries)}] Skipping: {video_title} (ID: {video_id} already exists)")
+                data[video_id]['playlist_index'] = counter
                 continue
+
+            video_info = get_video_info(video_url=video_url, playlist_index=counter)
+            data[video_id] = video_info
+
 
             print(f"[{counter}/{len(entries)}] Processing: {video_title}")
     
     return data
             
 
-def get_video_info(video_url, elenco_id):
+def get_video_info(video_url, playlist_index):
     ydl_opts = {'quiet': True, 'noplaylist': True}
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(video_url, download=False)
     # stream_url = info.get('url') or info['formats'][-1].get('url')
     return {
-        "elenco_id": elenco_id,
+        "playlist_index": playlist_index,
         "title": info.get('title','video'),
         "video_owner": info.get('uploader', 'unknown'),
         "date": info.get('upload_date','unknown'),

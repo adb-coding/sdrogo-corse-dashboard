@@ -1,602 +1,701 @@
 {
-    "elenco_1": {
-        "elenco_id": 1,
+    "St2VvfXHwpE": {
         "title": "MINI-GOLF NATALIZIO con ROHN,DREAD,GABBO e DELUX!",
         "video_owner": "Just Rohn JR",
         "date": "20251215",
         "link": "https://www.youtube.com/watch?v=St2VvfXHwpE",
-        "video_id": "St2VvfXHwpE"
+        "video_id": "St2VvfXHwpE",
+        "playlist_index": 1,
+        "image": "St2VvfXHwpE.png"
     },
-    "elenco_2": {
-        "elenco_id": 2,
+    "5S6Dq7LAFNA": {
         "title": "La SDROGO GOLFATINA di cui NON avevate bisogno",
         "video_owner": "GaBBoDSQ",
         "date": "20251217",
         "link": "https://www.youtube.com/watch?v=5S6Dq7LAFNA",
-        "video_id": "5S6Dq7LAFNA"
+        "video_id": "5S6Dq7LAFNA",
+        "playlist_index": 2,
+        "image": "5S6Dq7LAFNA.png"
     },
-    "elenco_3": {
-        "elenco_id": 3,
+    "80BMUVxCM9o": {
         "title": "UNA GOLFATINA PERICOLOSAMENTE NOSTALGICA...",
         "video_owner": "Delux",
         "date": "20251218",
         "link": "https://www.youtube.com/watch?v=80BMUVxCM9o",
-        "video_id": "80BMUVxCM9o"
+        "video_id": "80BMUVxCM9o",
+        "playlist_index": 3,
+        "image": "80BMUVxCM9o.png"
     },
-    "elenco_4": {
-        "elenco_id": 4,
+    "nORFy_eGVDA": {
         "title": "GOLFATINA MATTA con I MAESTRI di MAZZE e PALLE | w/Dread, Rohn, Marza, Gabbo, Delux",
         "video_owner": "Around Dread",
         "date": "20251227",
         "link": "https://www.youtube.com/watch?v=nORFy_eGVDA",
-        "video_id": "nORFy_eGVDA"
+        "video_id": "nORFy_eGVDA",
+        "playlist_index": 4,
+        "image": "nORFy_eGVDA.png"
     },
-    "elenco_5": {
-        "elenco_id": 5,
+    "KadhcxiF6Io": {
         "title": "SONO TORNATI I DOMINATORI DEL GOLF | Golfatina con Dread, Rohn, Gabbo, Delux",
         "video_owner": "Around Dread",
         "date": "20260108",
         "link": "https://www.youtube.com/watch?v=KadhcxiF6Io",
-        "video_id": "KadhcxiF6Io"
+        "video_id": "KadhcxiF6Io",
+        "playlist_index": 5,
+        "image": "KadhcxiF6Io.png"
     },
-    "elenco_6": {
-        "elenco_id": 6,
+    "qX7wKf7uupY": {
         "title": "GOLFATINA MAGICA con ROHN,DREAD, DELUX e il MASSEO!",
         "video_owner": "Just Rohn JR",
         "date": "20260109",
         "link": "https://www.youtube.com/watch?v=qX7wKf7uupY",
-        "video_id": "qX7wKf7uupY"
+        "video_id": "qX7wKf7uupY",
+        "playlist_index": 6,
+        "image": "qX7wKf7uupY.png"
     },
-    "elenco_7": {
-        "elenco_id": 7,
+    "fWl8BCgXTxQ": {
         "title": "LA SDROGO GOLFATINA DI INIZIO ANNO PER INIZIARE QUESTO 2026 AL MEGLIO",
         "video_owner": "GaBBoDSQ",
         "date": "20260110",
         "link": "https://www.youtube.com/watch?v=fWl8BCgXTxQ",
-        "video_id": "fWl8BCgXTxQ"
+        "video_id": "fWl8BCgXTxQ",
+        "playlist_index": 7,
+        "image": "fWl8BCgXTxQ.png"
     },
-    "elenco_8": {
-        "elenco_id": 8,
+    "4j9iPqrWtw0": {
         "title": "LA PRIMA GOLFATINA DELL'ANNO!",
         "video_owner": "Delux",
         "date": "20260112",
         "link": "https://www.youtube.com/watch?v=4j9iPqrWtw0",
-        "video_id": "4j9iPqrWtw0"
+        "video_id": "4j9iPqrWtw0",
+        "playlist_index": 8,
+        "image": "4j9iPqrWtw0.png"
     },
-    "elenco_9": {
-        "elenco_id": 9,
+    "6rJWPcxFRiM": {
         "title": "GOLFATINA MATTA INSENSATA (reg\u00e0 fermateci) con Dread, Rohn, Gabbo, Mollu",
         "video_owner": "Around Dread",
         "date": "20260122",
         "link": "https://www.youtube.com/watch?v=6rJWPcxFRiM",
-        "video_id": "6rJWPcxFRiM"
+        "video_id": "6rJWPcxFRiM",
+        "playlist_index": 9,
+        "image": "6rJWPcxFRiM.png"
     },
-    "elenco_10": {
-        "elenco_id": 10,
+    "CULR32YN7mM": {
         "title": "GOLFATINA \"HORROR\" CON QUALCHE IMPRECAZIONE DI TROPPO w/ROHN,DREAD, DELUX, JTAZ e il MASSEO!",
         "video_owner": "Just Rohn JR",
         "date": "20260126",
         "link": "https://www.youtube.com/watch?v=CULR32YN7mM",
-        "video_id": "CULR32YN7mM"
+        "video_id": "CULR32YN7mM",
+        "playlist_index": 10,
+        "image": "CULR32YN7mM.png"
     },
-    "elenco_11": {
-        "elenco_id": 11,
+    "u9_inJEE6JA": {
         "title": "UNA GOLFATINA OLIMPICA SPA ZIA LE!",
         "video_owner": "Delux",
         "date": "20260127",
         "link": "https://www.youtube.com/watch?v=u9_inJEE6JA",
-        "video_id": "u9_inJEE6JA"
+        "video_id": "u9_inJEE6JA",
+        "playlist_index": 11,
+        "image": "u9_inJEE6JA.png"
     },
-    "elenco_12": {
-        "elenco_id": 12,
+    "97Z5oHEr8-4": {
         "title": "SDROGO GOLFATINA SUPER COMBATTUTA con ilMasseo Dread Delu ( c'\u00e8 anche Jtaz )",
         "video_owner": "GaBBoDSQ",
         "date": "20260205",
         "link": "https://www.youtube.com/watch?v=97Z5oHEr8-4",
-        "video_id": "97Z5oHEr8-4"
+        "video_id": "97Z5oHEr8-4",
+        "playlist_index": 12,
+        "image": "97Z5oHEr8-4.png"
     },
-    "elenco_13": {
-        "elenco_id": 13,
+    "G10APU6StfY": {
         "title": "GOLFATINA FUORI DI CAPOCCIA con Dread, Gabbo, Masseo, JTaz",
         "video_owner": "Around Dread",
         "date": "20260206",
         "link": "https://www.youtube.com/watch?v=G10APU6StfY",
-        "video_id": "G10APU6StfY"
+        "video_id": "G10APU6StfY",
+        "playlist_index": 13,
+        "image": "G10APU6StfY.png"
     },
-    "elenco_14": {
-        "elenco_id": 14,
+    "rOYOAVS4H54": {
         "title": "GOLFATINA \"INVERNALE\" CON COLPI SENZA SENSO w/ROHN,DREAD, DELUX, GABBO e il MASSEO!",
         "video_owner": "Just Rohn JR",
         "date": "20260212",
         "link": "https://www.youtube.com/watch?v=rOYOAVS4H54",
-        "video_id": "rOYOAVS4H54"
+        "video_id": "rOYOAVS4H54",
+        "playlist_index": 14,
+        "image": "rOYOAVS4H54.png"
     },
-    "elenco_15": {
-        "elenco_id": 15,
+    "efppNZh_4UA": {
         "title": "UNA GOLFATINA PACIFICA TRA AMICI con Delux, Masseo, Gabbo & Dread",
         "video_owner": "Delux",
         "date": "20260317",
         "link": "https://www.youtube.com/watch?v=efppNZh_4UA",
-        "video_id": "efppNZh_4UA"
+        "video_id": "efppNZh_4UA",
+        "playlist_index": 15,
+        "image": "efppNZh_4UA.png"
     },
-    "elenco_16": {
-        "elenco_id": 16,
+    "sEUHEXe3iwM": {
         "title": "GOLFATINA DEMONIACA con Dread, Masseo, Gabbo, Delux",
         "video_owner": "Around Dread",
         "date": "20260318",
         "link": "https://www.youtube.com/watch?v=sEUHEXe3iwM",
-        "video_id": "sEUHEXe3iwM"
+        "video_id": "sEUHEXe3iwM",
+        "playlist_index": 16,
+        "image": "sEUHEXe3iwM.png"
     },
-    "elenco_17": {
-        "elenco_id": 17,
+    "YcdQ2kgViqM": {
         "title": "UNA GOLFATINA INIZIATA BENE E FINITA NEL CAOS PIU' TOTALE w/ROHN,DREAD, GABBO, MOLLU e il MASSEO \u26f3",
         "video_owner": "Just Rohn JR",
         "date": "20260320",
         "link": "https://www.youtube.com/watch?v=YcdQ2kgViqM",
-        "video_id": "YcdQ2kgViqM"
+        "video_id": "YcdQ2kgViqM",
+        "playlist_index": 17,
+        "image": "YcdQ2kgViqM.png"
     },
-    "elenco_18": {
-        "elenco_id": 18,
+    "1SoHXNKL53o": {
         "title": "Questa volta abbiamo fatto DAVVERO ARRABBIARE il Rohnnino\u2026 \ud83e\udd7a SDROGO GOLFATINA",
         "video_owner": "GaBBoDSQ",
         "date": "20260408",
         "link": "https://www.youtube.com/watch?v=1SoHXNKL53o",
-        "video_id": "1SoHXNKL53o"
+        "video_id": "1SoHXNKL53o",
+        "playlist_index": 18,
+        "image": "1SoHXNKL53o.png"
     },
-    "elenco_19": {
-        "elenco_id": 19,
+    "sXtQUINYS8Y": {
         "title": "SDROGO GOLFATINA CON I RE DELLE PALLE (amano le mazze...) con Dread, Rohn, Gabbo, Delux",
         "video_owner": "Around Dread",
         "date": "20260410",
         "link": "https://www.youtube.com/watch?v=sXtQUINYS8Y",
-        "video_id": "sXtQUINYS8Y"
+        "video_id": "sXtQUINYS8Y",
+        "playlist_index": 19,
+        "image": "sXtQUINYS8Y.png"
     },
-    "elenco_20": {
-        "elenco_id": 20,
+    "DtzjUGyzg0I": {
         "title": "GOLFATINA FURIOSA!...nella MAPPA PIU' BELLA MAI GIOCATA!? w/ROHN,DREAD,GABBO e DELUX \u26f3",
         "video_owner": "Just Rohn JR",
         "date": "20260417",
         "link": "https://www.youtube.com/watch?v=DtzjUGyzg0I",
-        "video_id": "DtzjUGyzg0I"
+        "video_id": "DtzjUGyzg0I",
+        "playlist_index": 20,
+        "image": "DtzjUGyzg0I.png"
     },
-    "elenco_21": {
-        "elenco_id": 21,
+    "7FTrpt99AsI": {
         "title": "4 STUDENTI DI OXFORD SI AFFRONTANO IN UNA GLORIOSA SUPER SDROGO GOLFATINA",
         "video_owner": "GaBBoDSQ",
         "date": "20260418",
         "link": "https://www.youtube.com/watch?v=7FTrpt99AsI",
-        "video_id": "7FTrpt99AsI"
+        "video_id": "7FTrpt99AsI",
+        "playlist_index": 21,
+        "image": "7FTrpt99AsI.png"
     },
-    "elenco_22": {
-        "elenco_id": 22,
+    "K6XbosbFIjg": {
         "title": "GOLFATINA MALEDETTA (l'ultimo ci lascia per sempre) con Dread, Rohn, Gabbo, Delux",
         "video_owner": "Around Dread",
         "date": "20260422",
         "link": "https://www.youtube.com/watch?v=K6XbosbFIjg",
-        "video_id": "K6XbosbFIjg"
+        "video_id": "K6XbosbFIjg",
+        "playlist_index": 22,
+        "image": "K6XbosbFIjg.png"
     },
-    "elenco_23": {
-        "elenco_id": 23,
+    "24gIGkEHAfw": {
         "title": "QUATTRO GOLFISTI PROFESSIONISTI GIOCANO AL VIDEOGIOCO DEL MINIGOLF con Delux, Dread, Gabbo & JTaz",
         "video_owner": "Delux",
         "date": "20260423",
         "link": "https://www.youtube.com/watch?v=24gIGkEHAfw",
-        "video_id": "24gIGkEHAfw"
+        "video_id": "24gIGkEHAfw",
+        "playlist_index": 23,
+        "image": "24gIGkEHAfw.png"
     },
-    "elenco_24": {
-        "elenco_id": 24,
+    "ZKEYfCubz1k": {
         "title": "SDROGO GOLFATINA ma IO E ROHN abbiamo LITIGATO",
         "video_owner": "GaBBoDSQ",
         "date": "20260429",
         "link": "https://www.youtube.com/watch?v=ZKEYfCubz1k",
-        "video_id": "ZKEYfCubz1k"
+        "video_id": "ZKEYfCubz1k",
+        "playlist_index": 24,
+        "image": "ZKEYfCubz1k.png"
     },
-    "elenco_25": {
-        "elenco_id": 25,
+    "kO4zxE6BXPA": {
         "title": "LA GOLFATINA pi\u00f9 TRANQUILLA di SEMPRE \u26f3 con DREAD, DELUX, GABBO, JTAZ",
         "video_owner": "JTaz Extra",
         "date": "20260430",
         "link": "https://www.youtube.com/watch?v=kO4zxE6BXPA",
-        "video_id": "kO4zxE6BXPA"
+        "video_id": "kO4zxE6BXPA",
+        "playlist_index": 25,
+        "image": "kO4zxE6BXPA.png"
     },
-    "elenco_26": {
-        "elenco_id": 26,
+    "_uvZcJiAq5I": {
         "title": "GOLFATINA FINITA MALE...RAGEQUIT A META' PARTITA?! w/ROHN,DREAD,GABBO e DELUX \u26f3",
         "video_owner": "Just Rohn JR",
         "date": "20260501",
         "link": "https://www.youtube.com/watch?v=_uvZcJiAq5I",
-        "video_id": "_uvZcJiAq5I"
+        "video_id": "_uvZcJiAq5I",
+        "playlist_index": 26,
+        "image": "_uvZcJiAq5I.png"
     },
-    "elenco_27": {
-        "elenco_id": 27,
+    "0E5bB60k9YI": {
         "title": "L'ELENCO PI\u00da BELLO MAI FATTO FINO AD ORA A MANI BASSE. con Delux, Rohn, Dread, Mollu & JTaz",
         "video_owner": "Delux",
         "date": "20260507",
         "link": "https://www.youtube.com/watch?v=0E5bB60k9YI",
-        "video_id": "0E5bB60k9YI"
+        "video_id": "0E5bB60k9YI",
+        "playlist_index": 27,
+        "image": "0E5bB60k9YI.png"
     },
-    "elenco_28": {
-        "elenco_id": 28,
+    "a6IGtNxVAGM": {
         "title": "GOLFATINA MOLTO ARRABBIATA con Dread, Rohn, Masseo, Gabbo, Delux",
         "video_owner": "Around Dread",
         "date": "20260509",
         "link": "https://www.youtube.com/watch?v=a6IGtNxVAGM",
-        "video_id": "a6IGtNxVAGM"
+        "video_id": "a6IGtNxVAGM",
+        "playlist_index": 28,
+        "image": "a6IGtNxVAGM.png"
     },
-    "elenco_29": {
-        "elenco_id": 29,
+    "2zdkusQJBbU": {
         "title": "GOLFATINA OLIMPICA - UN RECORD IMPOSSIBILE DA BATTERE w/ROHN,DREAD,DELUX e JTAZ \u26f3",
         "video_owner": "Just Rohn JR",
         "date": "20260512",
         "link": "https://www.youtube.com/watch?v=2zdkusQJBbU",
-        "video_id": "2zdkusQJBbU"
+        "video_id": "2zdkusQJBbU",
+        "playlist_index": 29,
+        "image": "2zdkusQJBbU.png"
     },
-    "elenco_30": {
-        "elenco_id": 30,
+    "EJMEBEJzjGo": {
         "title": "La PRIMA GOLFATINA non si scorda MAI: Golf With Your Friends \u26f3\ufe0f\ud83c\udfcc\ufe0f\u200d\u2642\ufe0f",
         "video_owner": "oessaM",
         "date": "20260513",
         "link": "https://www.youtube.com/watch?v=EJMEBEJzjGo",
-        "video_id": "EJMEBEJzjGo"
+        "video_id": "EJMEBEJzjGo",
+        "playlist_index": 30,
+        "image": "EJMEBEJzjGo.png"
     },
-    "elenco_31": {
-        "elenco_id": 31,
+    "54RjIkAC8g4": {
         "title": "UNA MAPPA SDROGO PER UNA GOLFATINA SDROGO ( occhio al progetto )",
         "video_owner": "GaBBoDSQ",
         "date": "20260515",
         "link": "https://www.youtube.com/watch?v=54RjIkAC8g4",
-        "video_id": "54RjIkAC8g4"
+        "video_id": "54RjIkAC8g4",
+        "playlist_index": 31,
+        "image": "54RjIkAC8g4.png"
     },
-    "elenco_32": {
-        "elenco_id": 32,
+    "cWkIOXTKNK8": {
         "title": "LA GOLFATINA INFERNALE RPG. con Delux, Rohn, Dread, Mollu & Gabbodismerdaland",
         "video_owner": "Delux",
         "date": "20260519",
         "link": "https://www.youtube.com/watch?v=cWkIOXTKNK8",
-        "video_id": "cWkIOXTKNK8"
+        "video_id": "cWkIOXTKNK8",
+        "playlist_index": 32,
+        "image": "cWkIOXTKNK8.png"
     },
-    "elenco_33": {
-        "elenco_id": 33,
+    "-NC4P43jSLs": {
         "title": "GOLFATINA DI COMPLEANNO...MA MI TRATTANO TUTTI MALE w/ROHN, DREAD, MOLLU, JTAZ e il MASSEO \u26f3",
         "video_owner": "Just Rohn JR",
         "date": "20260526",
         "link": "https://www.youtube.com/watch?v=-NC4P43jSLs",
-        "video_id": "-NC4P43jSLs"
+        "video_id": "-NC4P43jSLs",
+        "playlist_index": 33,
+        "image": "-NC4P43jSLs.png"
     },
-    "elenco_34": {
-        "elenco_id": 34,
+    "lj5-ddG4zTM": {
         "title": "UNA GOLFATINA DEMONIACA. con Delux, Dread, Gabbo & JTaz from the stars",
         "video_owner": "Delux",
         "date": "20260528",
         "link": "https://www.youtube.com/watch?v=lj5-ddG4zTM",
-        "video_id": "lj5-ddG4zTM"
+        "video_id": "lj5-ddG4zTM",
+        "playlist_index": 34,
+        "image": "lj5-ddG4zTM.png"
     },
-    "elenco_35": {
-        "elenco_id": 35,
+    "YleYm6W8AU4": {
         "title": "SDROGO GOLFATINA ESPLOSIVA ( letteralmente )",
         "video_owner": "GaBBoDSQ",
         "date": "20260605",
         "link": "https://www.youtube.com/watch?v=YleYm6W8AU4",
-        "video_id": "YleYm6W8AU4"
+        "video_id": "YleYm6W8AU4",
+        "playlist_index": 35,
+        "image": "YleYm6W8AU4.png"
     },
-    "elenco_36": {
-        "elenco_id": 36,
+    "la960Us8FWQ": {
         "title": "UNA CALDA GOLFATINA...CHE SAPPIAMO GIA' COME ANDRA' A FINIRE w/ROHN, DREAD, GABBO, MOLLU e DELUX \u26f3",
         "video_owner": "Just Rohn JR",
         "date": "20260606",
         "link": "https://www.youtube.com/watch?v=la960Us8FWQ",
-        "video_id": "la960Us8FWQ"
+        "video_id": "la960Us8FWQ",
+        "playlist_index": 36,
+        "image": "la960Us8FWQ.png"
     },
-    "elenco_37": {
-        "elenco_id": 37,
+    "x9M1RflGCE4": {
         "title": "GOLFATINA SBUDELLANTE con Dread, Rohn, Gabbo e Delu",
         "video_owner": "oessaM",
         "date": "20260608",
         "link": "https://www.youtube.com/watch?v=x9M1RflGCE4",
-        "video_id": "x9M1RflGCE4"
+        "video_id": "x9M1RflGCE4",
+        "playlist_index": 37,
+        "image": "x9M1RflGCE4.png"
     },
-    "elenco_38": {
-        "elenco_id": 38,
+    "XWkrat_kXCw": {
         "title": "GOLFATINA ESTIVA PER DIVERTIRCI FRA AMICI (non ci siamo divertiti)",
         "video_owner": "Around Dread",
         "date": "20260610",
         "link": "https://www.youtube.com/watch?v=XWkrat_kXCw",
-        "video_id": "XWkrat_kXCw"
+        "video_id": "XWkrat_kXCw",
+        "playlist_index": 38,
+        "image": "XWkrat_kXCw.png"
     },
-    "elenco_39": {
-        "elenco_id": 39,
+    "Hu7tK5NXzrU": {
         "title": "QUESTA \u00c9 LA GOLFATINA RISTORATIVA. con Delux, Dread, Gabbo, Rohn & Mollu",
         "video_owner": "Delux",
         "date": "20260611",
         "link": "https://www.youtube.com/watch?v=Hu7tK5NXzrU",
-        "video_id": "Hu7tK5NXzrU"
+        "video_id": "Hu7tK5NXzrU",
+        "playlist_index": 39,
+        "image": "Hu7tK5NXzrU.png"
     },
-    "elenco_40": {
-        "elenco_id": 40,
+    "Msk6dgjsLLc": {
         "title": "UNA FRESCA GOLFATINA TRA LE CASCATE...NON BASTA A TENERCI CALMI w/ROHN, DREAD, GABBO e DELUX \u26f3",
         "video_owner": "Just Rohn JR",
         "date": "20260612",
         "link": "https://www.youtube.com/watch?v=Msk6dgjsLLc",
-        "video_id": "Msk6dgjsLLc"
+        "video_id": "Msk6dgjsLLc",
+        "playlist_index": 40,
+        "image": "Msk6dgjsLLc.png"
     },
-    "elenco_41": {
-        "elenco_id": 41,
+    "wwmsp8CASPU": {
         "title": "UNA GOLFATINA MOLTO EDUCATA. con Delux, Rohn, Gabbo & Masseo",
         "video_owner": "Delux",
         "date": "20260618",
         "link": "https://www.youtube.com/watch?v=wwmsp8CASPU",
-        "video_id": "wwmsp8CASPU"
+        "video_id": "wwmsp8CASPU",
+        "playlist_index": 41,
+        "image": "wwmsp8CASPU.png"
     },
-    "elenco_42": {
-        "elenco_id": 42,
+    "SjL8fdo25HY": {
         "title": "UNA GOLFATINA NEI CIELI...PASSATA A INSULTARE CHI CI ABITA w/ROHN, DREAD, GABBO, DELUX e il MASSEO \u26f3",
         "video_owner": "Just Rohn JR",
         "date": "20260619",
         "link": "https://www.youtube.com/watch?v=SjL8fdo25HY",
-        "video_id": "SjL8fdo25HY"
+        "video_id": "SjL8fdo25HY",
+        "playlist_index": 42,
+        "image": "SjL8fdo25HY.png"
     },
-    "elenco_43": {
-        "elenco_id": 43,
+    "VOkBVCSZfPU": {
         "title": "GOLFATINA DELIZIOSA con Dread, Rohn, Gabbo, Delux, Mollu",
         "video_owner": "Around Dread",
         "date": "20260620",
         "link": "https://www.youtube.com/watch?v=VOkBVCSZfPU",
-        "video_id": "VOkBVCSZfPU"
+        "video_id": "VOkBVCSZfPU",
+        "playlist_index": 43,
+        "image": "VOkBVCSZfPU.png"
     },
-    "elenco_44": {
-        "elenco_id": 44,
+    "GAJyP4Qc5Es": {
         "title": "UNA GOLFATINA ZUCCHERATA\ud83c\udf6d con Dread, Rohn, Gabbo e Delu",
         "video_owner": "oessaM",
         "date": "20260622",
         "link": "https://www.youtube.com/watch?v=GAJyP4Qc5Es",
-        "video_id": "GAJyP4Qc5Es"
+        "video_id": "GAJyP4Qc5Es",
+        "playlist_index": 45,
+        "image": "GAJyP4Qc5Es.png"
     },
-    "elenco_45": {
-        "elenco_id": 45,
+    "-FYK0fm5JjU": {
         "title": "UNA GOLFATINA RICCA DI SEGRETI E PAROLE BANNABILI w/ROHN, DREAD, GABBO, DELUX e il MASSEO \u26f3",
         "video_owner": "Just Rohn JR",
         "date": "20260626",
         "link": "https://www.youtube.com/watch?v=-FYK0fm5JjU",
-        "video_id": "-FYK0fm5JjU"
+        "video_id": "-FYK0fm5JjU",
+        "playlist_index": 46,
+        "image": "-FYK0fm5JjU.png"
     },
-    "elenco_46": {
-        "elenco_id": 46,
+    "FPop4CKfq9o": {
         "title": "GOLFATA con DREAD GABBO DELUX e FAVA",
         "video_owner": "ChapeGaming",
         "date": "20260630",
         "link": "https://www.youtube.com/watch?v=FPop4CKfq9o",
-        "video_id": "FPop4CKfq9o"
+        "video_id": "FPop4CKfq9o",
+        "playlist_index": 47,
+        "image": "FPop4CKfq9o.png"
     },
-    "elenco_47": {
-        "elenco_id": 47,
+    "dx51mfR2QP4": {
         "title": "LA GOLFATINA CHE PIACE A VOI! con Delux, Dread, Gabbo, Rohn & Mollu",
         "video_owner": "Delux",
         "date": "20260702",
         "link": "https://www.youtube.com/watch?v=dx51mfR2QP4",
-        "video_id": "dx51mfR2QP4"
+        "video_id": "dx51mfR2QP4",
+        "playlist_index": 48,
+        "image": "dx51mfR2QP4.png"
     },
-    "elenco_48": {
-        "elenco_id": 48,
+    "CS8kqLYXJZo": {
         "title": "GOLFATINA NEL CASTELLO! LA MAPPA PIU' BELLA DI SEMPRE?! w/ROHN, DREAD, GABBO, DELUX e il MASSEO \u26f3",
         "video_owner": "Just Rohn JR",
         "date": "20260703",
         "link": "https://www.youtube.com/watch?v=CS8kqLYXJZo",
-        "video_id": "CS8kqLYXJZo"
+        "video_id": "CS8kqLYXJZo",
+        "playlist_index": 49,
+        "image": "CS8kqLYXJZo.png"
     },
-    "elenco_49": {
-        "elenco_id": 49,
+    "pehCX9kJwbI": {
         "title": "SDROGO GOLFATINA CON DUE PAZZI SCATENATI ( speciali ) w/ Chape, Fava, Dread, Delux",
         "video_owner": "GaBBoDSQ",
         "date": "20260705",
         "link": "https://www.youtube.com/watch?v=pehCX9kJwbI",
-        "video_id": "pehCX9kJwbI"
+        "video_id": "pehCX9kJwbI",
+        "playlist_index": 50,
+        "image": "pehCX9kJwbI.png"
     },
-    "elenco_50": {
-        "elenco_id": 50,
+    "jy7RzcCAIXg": {
         "title": "GOLFATINA SGARGIANTE: Gabbines TILTA DURO con Dread, Gabbo e Delux",
         "video_owner": "oessaM",
         "date": "20260706",
         "link": "https://www.youtube.com/watch?v=jy7RzcCAIXg",
-        "video_id": "jy7RzcCAIXg"
+        "video_id": "jy7RzcCAIXg",
+        "playlist_index": 51,
+        "image": "jy7RzcCAIXg.png"
     },
-    "elenco_51": {
-        "elenco_id": 51,
+    "As94bosHv14": {
         "title": "UNA GOLFATINA CON LE COLLISIONI PER CHI NON SI OFFENDE. con Delux, Gubbio, Droid & JTaz",
         "video_owner": "Delux",
         "date": "20260707",
         "link": "https://www.youtube.com/watch?v=As94bosHv14",
-        "video_id": "As94bosHv14"
+        "video_id": "As94bosHv14",
+        "playlist_index": 52,
+        "image": "As94bosHv14.png"
     },
-    "elenco_52": {
-        "elenco_id": 52,
+    "iHz3SBcySM8": {
         "title": "L'ULTIMA GOLFATINA...CON GLI OCCHIALI?! GIOCHIAMO SENZA AGITARCI con ROHN, DREAD, DELUX e JTAZ \u26f3",
         "video_owner": "Just Rohn JR",
         "date": "20260710",
         "link": "https://www.youtube.com/watch?v=iHz3SBcySM8",
-        "video_id": "iHz3SBcySM8"
+        "video_id": "iHz3SBcySM8",
+        "playlist_index": 53,
+        "image": "iHz3SBcySM8.png"
     },
-    "elenco_53": {
-        "elenco_id": 53,
+    "hJpkPpCW4xI": {
         "title": "LA GOLFATINA PI\u00d9 DIFFICILE DI SEMPRE con Dread, Rohn, Masseo, Delux, Jimmy",
         "video_owner": "Around Dread",
         "date": "20260711",
         "link": "https://www.youtube.com/watch?v=hJpkPpCW4xI",
-        "video_id": "hJpkPpCW4xI"
+        "video_id": "hJpkPpCW4xI",
+        "playlist_index": 54,
+        "image": "hJpkPpCW4xI.png"
     },
-    "elenco_54": {
-        "elenco_id": 54,
+    "lwXehBrxT98": {
         "title": "GOLFATINA a BLOCCHI di MINECRAFT (sono una pippa) \u26f3\ufe0f con DREAD, DELUX, GABBO, JTAZ",
         "video_owner": "JTaz Extra",
         "date": "20260713",
         "link": "https://www.youtube.com/watch?v=lwXehBrxT98",
-        "video_id": "lwXehBrxT98"
+        "video_id": "lwXehBrxT98",
+        "playlist_index": 55,
+        "image": "lwXehBrxT98.png"
     },
-    "elenco_55": {
-        "elenco_id": 55,
+    "ZSNlke35wvY": {
         "title": "UNA GOLFATINA TRA IPERVEDENTI. con Delux, Gabbo, Dread, JTaz e JustFinalmentecivedoRohn",
         "video_owner": "Delux",
         "date": "20260716",
         "link": "https://www.youtube.com/watch?v=ZSNlke35wvY",
-        "video_id": "ZSNlke35wvY"
+        "video_id": "ZSNlke35wvY",
+        "playlist_index": 56,
+        "image": "ZSNlke35wvY.png"
     },
-    "elenco_56": {
-        "elenco_id": 56,
+    "Utm999peUYg": {
         "title": "LA MIA PRIMA GOLFATINA SENZA OCCHIALI...E' STATA UN DISASTRO! w/ROHN, DREAD, GABBO, DELUX e JTAZ \u26f3",
         "video_owner": "Just Rohn JR",
         "date": "20260717",
         "link": "https://www.youtube.com/watch?v=Utm999peUYg",
-        "video_id": "Utm999peUYg"
+        "video_id": "Utm999peUYg",
+        "playlist_index": 57,
+        "image": "Utm999peUYg.png"
     },
-    "elenco_57": {
-        "elenco_id": 57,
+    "uNAW22mWuuw": {
         "title": "LA GOLFATINA SETTIMANALE DEL CRISTO con Dolbex Dredonicogrobert GorbioBarsbertaland Masbrecot & Molu",
         "video_owner": "Delux",
         "date": "20260723",
         "link": "https://www.youtube.com/watch?v=uNAW22mWuuw",
-        "video_id": "uNAW22mWuuw"
+        "video_id": "uNAW22mWuuw",
+        "playlist_index": 58,
+        "image": "uNAW22mWuuw.png"
     },
-    "elenco_58": {
-        "elenco_id": 58,
+    "6Gg12l2y3G4": {
         "title": "LA GOLFATINA DELLA REDENZIONE DI JUST ROHN ( ancora orbo )",
         "video_owner": "GaBBoDSQ",
         "date": "20260724",
         "link": "https://www.youtube.com/watch?v=6Gg12l2y3G4",
-        "video_id": "6Gg12l2y3G4"
+        "video_id": "6Gg12l2y3G4",
+        "playlist_index": 59,
+        "image": "6Gg12l2y3G4.png"
     },
-    "elenco_59": {
-        "elenco_id": 59,
+    "PXNSIH3FsTE": {
         "title": "GOLFATINA DIVERTENTISSIMA con Dread, Rohn, Masseo, Delux",
         "video_owner": "Around Dread",
         "date": "20260725",
         "link": "https://www.youtube.com/watch?v=PXNSIH3FsTE",
-        "video_id": "PXNSIH3FsTE"
+        "video_id": "PXNSIH3FsTE",
+        "playlist_index": 60,
+        "image": "PXNSIH3FsTE.png"
     },
-    "elenco_60": {
-        "elenco_id": 60,
+    "x73ua8AMuTc": {
         "title": "GOLFATINA TUMULTO DI RABBIA\ufe31con Dread, Gabbo, Mollu e Delu",
         "video_owner": "oessaM",
         "date": "20260727",
         "link": "https://www.youtube.com/watch?v=x73ua8AMuTc",
-        "video_id": "x73ua8AMuTc"
+        "video_id": "x73ua8AMuTc",
+        "playlist_index": 61,
+        "image": "x73ua8AMuTc.png"
     },
-    "elenco_61": {
-        "elenco_id": 61,
+    "JNd8kXdBYGM": {
         "title": "SDROGO GOLFATINA FARAONICA ESPLOSIVA \ud83d\udca3\ud83d\udca5",
         "video_owner": "GaBBoDSQ",
         "date": "20260729",
         "link": "https://www.youtube.com/watch?v=JNd8kXdBYGM",
-        "video_id": "JNd8kXdBYGM"
+        "video_id": "JNd8kXdBYGM",
+        "playlist_index": 62,
+        "image": "JNd8kXdBYGM.png"
     },
-    "elenco_62": {
-        "elenco_id": 62,
+    "3BTlussfTgQ": {
         "title": "LA GOLFATINA NELLA CAVERNA...FINISCE IN TRAGEDIA! w/ROHN, DREAD, GABBO, DELUX, MOLLU e IL MASSEO \u26f3",
         "video_owner": "Just Rohn JR",
         "date": "20260731",
         "link": "https://www.youtube.com/watch?v=3BTlussfTgQ",
-        "video_id": "3BTlussfTgQ"
+        "video_id": "3BTlussfTgQ",
+        "playlist_index": 63,
+        "image": "3BTlussfTgQ.png"
     },
-    "elenco_63": {
-        "elenco_id": 63,
+    "HQalUVkaCS8": {
         "title": "LA MEGA GOLFATA DEGLI DEI (ilmasseo ha fatto arrabbiare Zeus) con Dread, Gabbo, Mollu, Delux, Masseo",
         "video_owner": "Around Dread",
         "date": "20260808",
         "link": "https://www.youtube.com/watch?v=HQalUVkaCS8",
-        "video_id": "HQalUVkaCS8"
+        "video_id": "HQalUVkaCS8",
+        "playlist_index": 64,
+        "image": "HQalUVkaCS8.png"
     },
-    "elenco_64": {
-        "elenco_id": 64,
+    "-VpgGrDbnx0": {
         "title": "SDROGO GOLFATINA ALLA RICERCA DEL PROGETTO GABBINESS",
         "video_owner": "GaBBoDSQ",
         "date": "20260809",
         "link": "https://www.youtube.com/watch?v=-VpgGrDbnx0",
-        "video_id": "-VpgGrDbnx0"
+        "video_id": "-VpgGrDbnx0",
+        "playlist_index": 65,
+        "image": "-VpgGrDbnx0.png"
     },
-    "elenco_65": {
-        "elenco_id": 65,
+    "K7ObaKsIbM0": {
         "title": "LA GOLFATINA DELLA VERGOGNA! w/ROHN, DREAD, GABBO, DELUX e MOLLU \u26f3",
         "video_owner": "Just Rohn JR",
         "date": "20260811",
         "link": "https://www.youtube.com/watch?v=K7ObaKsIbM0",
-        "video_id": "K7ObaKsIbM0"
+        "video_id": "K7ObaKsIbM0",
+        "playlist_index": 66,
+        "image": "K7ObaKsIbM0.png"
     },
-    "elenco_66": {
-        "elenco_id": 66,
+    "LC3bdmO-AGI": {
         "title": "LA MIA PRIMISSIMA GOLFATINA con Delux Rohn Gabbo e Jtaz",
         "video_owner": "Mollu",
         "date": "20260821",
         "link": "https://www.youtube.com/watch?v=LC3bdmO-AGI",
-        "video_id": "LC3bdmO-AGI"
+        "video_id": "LC3bdmO-AGI",
+        "playlist_index": 67,
+        "image": "LC3bdmO-AGI.png"
     },
-    "elenco_67": {
-        "elenco_id": 67,
+    "XXTN5QD3PXc": {
         "title": "LA GOLFATINA NEL MUSEO...PRENDE SUBITO UNA BRUTTA PIEGA...w/ROHN, DREAD, GABBO, DELUX e MOLLU \u26f3",
         "video_owner": "Just Rohn JR",
         "date": "20260821",
         "link": "https://www.youtube.com/watch?v=XXTN5QD3PXc",
-        "video_id": "XXTN5QD3PXc"
+        "video_id": "XXTN5QD3PXc",
+        "playlist_index": 68,
+        "image": "XXTN5QD3PXc.png"
     },
-    "elenco_68": {
-        "elenco_id": 68,
+    "1mMxDTw_ytQ": {
         "title": "GOLFATINA AI LIMITI DELLA PAZIENZA (Gabbo ha rotto TUTTO) Dread, Rohn, Gabbo, Masseo, Delux, Mollu",
         "video_owner": "Around Dread",
         "date": "20260826",
         "link": "https://www.youtube.com/watch?v=1mMxDTw_ytQ",
-        "video_id": "1mMxDTw_ytQ"
+        "video_id": "1mMxDTw_ytQ",
+        "playlist_index": 69,
+        "image": "1mMxDTw_ytQ.png"
     },
-    "elenco_69": {
-        "elenco_id": 69,
+    "xC_YNHOFDE4": {
         "title": "BENVENUTI ALL'INFERNO: SDROGO GOLFATINA DEMONIACA ( mappa folle )",
         "video_owner": "GaBBoDSQ",
         "date": "20260830",
         "link": "https://www.youtube.com/watch?v=xC_YNHOFDE4",
-        "video_id": "xC_YNHOFDE4"
+        "video_id": "xC_YNHOFDE4",
+        "playlist_index": 70,
+        "image": "xC_YNHOFDE4.png"
     },
-    "elenco_70": {
-        "elenco_id": 70,
+    "UiuVahUOQWM": {
         "title": "ZUGU GOLFATINA ESTIVA \ud83c\udfd6\ufe0f con DREAD, ROHN, DELUX, JTAZ",
         "video_owner": "JTaz Extra",
         "date": "20260831",
         "link": "https://www.youtube.com/watch?v=UiuVahUOQWM",
-        "video_id": "UiuVahUOQWM"
+        "video_id": "UiuVahUOQWM",
+        "playlist_index": 71,
+        "image": "UiuVahUOQWM.png"
     },
-    "elenco_71": {
-        "elenco_id": 71,
+    "vwu4uBpJpGY": {
         "title": "GOLFATINA da RIABILITAZIONE con @AroundDread @GaBBoDSQ @oDeluxx @Mollu",
         "video_owner": "oessaM",
         "date": "20260831",
         "link": "https://www.youtube.com/watch?v=vwu4uBpJpGY",
-        "video_id": "vwu4uBpJpGY"
+        "video_id": "vwu4uBpJpGY",
+        "playlist_index": 72,
+        "image": "vwu4uBpJpGY.png"
     },
-    "elenco_72": {
-        "elenco_id": 72,
+    "LMg9XwLmyhs": {
         "title": "C'\u00c9 UN PO DI GOLFATINA IN QUESTA CENSURA. con Delux, Rohn, Dread & JTaz",
         "video_owner": "Delux",
         "date": "20260901",
         "link": "https://www.youtube.com/watch?v=LMg9XwLmyhs",
-        "video_id": "LMg9XwLmyhs"
+        "video_id": "LMg9XwLmyhs",
+        "playlist_index": 73,
+        "image": "LMg9XwLmyhs.png"
     },
-    "elenco_73": {
-        "elenco_id": 73,
+    "z1eH4XjF9Us": {
         "title": "LA GOLFATINA DEI LAVORATORI w/ROHN, DREAD, DELUX e JTAZ \u26f3",
         "video_owner": "Just Rohn JR",
         "date": "20260904",
         "link": "https://www.youtube.com/watch?v=z1eH4XjF9Us",
-        "video_id": "z1eH4XjF9Us"
+        "video_id": "z1eH4XjF9Us",
+        "playlist_index": 74,
+        "image": "z1eH4XjF9Us.png"
     },
-    "elenco_74": {
-        "elenco_id": 74,
+    "wYoggEe7nIY": {
         "title": "SDROGO GOLFATINA MEGA GALATTICA TRA AMICI (ci siamo insultati) w/Dread, Gabbo, Masseo, Delux, Mollu",
         "video_owner": "Around Dread",
         "date": "20260909",
         "link": "https://www.youtube.com/watch?v=wYoggEe7nIY",
-        "video_id": "wYoggEe7nIY"
+        "video_id": "wYoggEe7nIY",
+        "playlist_index": 75,
+        "image": "wYoggEe7nIY.png"
     },
-    "elenco_75": {
-        "elenco_id": 75,
+    "CJ4_ICyfk5I": {
         "title": "SDROGO GOLFATINA ORIENTALE con Dread Cannuccia Mollu Jtaz e Paolo",
         "video_owner": "GaBBoDSQ",
         "date": "20260910",
         "link": "https://www.youtube.com/watch?v=CJ4_ICyfk5I",
-        "video_id": "CJ4_ICyfk5I"
+        "video_id": "CJ4_ICyfk5I",
+        "playlist_index": 76,
+        "image": "CJ4_ICyfk5I.png"
+    },
+    "PhqKCnbBATg": {
+        "playlist_index": 44,
+        "title": "SDROGO GOLFATINA ma IO CREDO NEL PROGETTO GABBINESS",
+        "video_owner": "GaBBoDSQ",
+        "date": "20260621",
+        "link": "https://www.youtube.com/watch?v=PhqKCnbBATg",
+        "video_id": "PhqKCnbBATg"
+    },
+    "II1Wo61nTvc": {
+        "playlist_index": 77,
+        "title": "LA GOLFATINA SURREALE con Dread, Cannuccia, JTaz e Delux",
+        "video_owner": "Mollu",
+        "date": "20260912",
+        "link": "https://www.youtube.com/watch?v=II1Wo61nTvc",
+        "video_id": "II1Wo61nTvc"
+    },
+    "64B0CXKG2D4": {
+        "playlist_index": 78,
+        "title": "LA GOLFATINA DEI CAMPIONI \u26f3\ufe0f con DREAD, GABBO, DELUX, MOLLU, JTAZ",
+        "video_owner": "JTaz Extra",
+        "date": "20260914",
+        "link": "https://www.youtube.com/watch?v=64B0CXKG2D4",
+        "video_id": "64B0CXKG2D4"
     }
 }
