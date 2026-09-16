@@ -6,6 +6,15 @@ import { GitCommit, Star, Bug } from 'lucide-react'
 
 const CHANGELOG = [
   {
+    version: "2.1.0",
+    date: "16-09-2026",
+    title: "iRacing Arcade",
+    features: [
+      "Aggiunta pagina di selezione gioco",
+      "Aggiunta la classifica di iRacing Arcade"
+    ]
+  },
+  {
     version: "2.0.2",
     date: "01-09-2026",
     title: "Loading Page and Lighter Loading",

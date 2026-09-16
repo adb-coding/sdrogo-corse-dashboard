@@ -38,3 +38,6 @@ AGENTS.md
 
 # IMPORTANT: The primary data source is now in public/sdrogo_corse_stats.csv.
 # We are NOT ignoring it because it is required for the app to function after deployment.
+
+# backup
+/scripts/golf-extraction/data_img.json.bak
