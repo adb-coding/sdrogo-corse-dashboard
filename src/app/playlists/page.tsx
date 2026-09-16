@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { Header, SeasonFilter,  DriverFilter, Footer } from '@/components'
-import { parseCSV, getPlaylistData, filterEntriesBySeason, getAvailableYears, processPlayerStats } from '@/lib/data'
+import { Header, SeasonFilter, DriverFilter, MultiSelectFilter, TitleSearch, RaceBreakdown, PackageStats, Footer } from '@/components'
+import { parseCSV, getPlaylistData, filterEntriesBySeason, getAvailableYears, getAvailablePackages } from '@/lib/data'
 import { getPlayerColor, normalizePlayerName } from '@/lib/colors'
 import { PlaylistData, RaceEntry } from '@/types'
 import { motion } from 'framer-motion'
-import { Trophy, User, ExternalLink, Youtube } from 'lucide-react'
+import { Trophy, User, ExternalLink, Youtube, MapPin, Car } from 'lucide-react'
 import { useGameMode } from '@/lib/game-mode'
 import { CartesianGrid, ResponsiveContainer, LineChart, Tooltip, Line, XAxis, YAxis } from 'recharts'
 import Link from 'next/link'
@@ -16,6 +16,9 @@ export default function PlaylistsPage() {
   const { config } = useGameMode()
   const [seasons, setSeasons] = useState<string[]>(['all'])
   const [selectedDrivers, setSelectedDrivers] = useState<string[]>([])
+  const [selectedTracks, setSelectedTracks] = useState<string[]>(['all'])
+  const [selectedCars, setSelectedCars] = useState<string[]>(['all'])
+  const [titleQuery, setTitleQuery] = useState('')
   const [allEntries, setAllEntries] = useState<RaceEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -48,15 +51,29 @@ export default function PlaylistsPage() {
     return Array.from(drivers).sort()
   }, [allEntries])
 
+  const availableTracks = useMemo(() => getAvailablePackages(allEntries, 'tracks'), [allEntries])
+  const availableCars = useMemo(() => getAvailablePackages(allEntries, 'cars'), [allEntries])
+
   const playlists = useMemo(() => {
     const filteredBySeason = filterEntriesBySeason(allEntries, seasons)
     const allPlaylists = getPlaylistData(filteredBySeason, config.lowerIsBetter)
-    if (selectedDrivers.length === 0 || selectedDrivers.includes('all')) return allPlaylists;
-    return allPlaylists.filter(playlists => {
-      const playerInPlaylist = playlists.results.map(r => r.player)
-      return selectedDrivers.some(driver => playerInPlaylist.includes(driver))
+
+    const driverNeutral = isNeutral(selectedDrivers)
+    const trackNeutral = isNeutral(selectedTracks)
+    const carNeutral = isNeutral(selectedCars)
+    const query = titleQuery.trim().toLowerCase()
+
+    return allPlaylists.filter(playlist => {
+      if (!driverNeutral) {
+        const players = playlist.results.map(r => r.player)
+        if (!selectedDrivers.some(driver => players.includes(driver))) return false
+      }
+      if (!trackNeutral && !playlist.tracks.some(t => selectedTracks.includes(t))) return false
+      if (!carNeutral && !playlist.cars.some(c => selectedCars.includes(c))) return false
+      if (query && !(playlist.videoTitle || '').toLowerCase().includes(query)) return false
+      return true
     })
-  }, [allEntries, seasons, config.lowerIsBetter, selectedDrivers])
+  }, [allEntries, seasons, config.lowerIsBetter, selectedDrivers, selectedTracks, selectedCars, titleQuery])
 
   useEffect(() => {
     if (selectedId !== null && !playlists.find(p => p.elencoId === selectedId)) {
@@ -89,15 +106,40 @@ export default function PlaylistsPage() {
               Elenchi
             </h1>
             <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest mt-1">
-              Database Completo Gare {seasons.includes('all') ? 'All-Time' : seasons.sort().join(' + ')}
+              Database Completo Gare {seasons.includes('all') ? 'All-Time' : seasons.sort().join(' + ')} — {playlists.length} elenchi
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-4">
+          {/* Two-up on phones so five filters don't become one tall column. */}
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3 md:justify-end">
+            <div className="col-span-2 sm:col-auto">
+              <TitleSearch value={titleQuery} onChange={setTitleQuery} />
+            </div>
             <DriverFilter
               availableDrivers={availableDrivers}
               selectedDrivers={selectedDrivers}
               onDriverChange={setSelectedDrivers}
               />
+            {/* Track/car filters only exist for games whose CSV carries them. */}
+            {availableTracks.length > 0 && (
+              <MultiSelectFilter
+                label="Circuito"
+                icon={<MapPin className="w-4 h-4" />}
+                allLabel="Tutti"
+                options={availableTracks}
+                selected={selectedTracks}
+                onChange={setSelectedTracks}
+              />
+            )}
+            {availableCars.length > 0 && (
+              <MultiSelectFilter
+                label="Vettura"
+                icon={<Car className="w-4 h-4" />}
+                allLabel="Tutte"
+                options={availableCars}
+                selected={selectedCars}
+                onChange={setSelectedCars}
+              />
+            )}
             <SeasonFilter 
               availableYears={availableYears}
               selectedSeasons={seasons} 
@@ -105,6 +147,14 @@ export default function PlaylistsPage() {
               />
           </div>
         </div>
+
+        <PackageStats playlists={playlists} />
+
+        {playlists.length === 0 && (
+          <div className="p-12 rounded-xl border border-dashed border-zinc-800 text-center text-[10px] font-mono uppercase tracking-widest text-zinc-600">
+            Nessun elenco corrisponde ai filtri
+          </div>
+        )}
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {playlists.map((playlist, index) => {
@@ -151,6 +201,42 @@ export default function PlaylistsPage() {
                       />
                     ))}
                   </div>
+
+                  {/* iRacing only: the circuits and car packages of this elenco. */}
+                  {(playlist.tracks.length > 0 || playlist.cars.length > 0) && (
+                    <div className="mt-3 pt-2.5 border-t border-zinc-800/60 space-y-1.5">
+                      {playlist.tracks.length > 0 && (
+                        <div className="flex items-start gap-1.5">
+                          <MapPin className="w-3 h-3 text-zinc-600 shrink-0 mt-0.5" />
+                          <div className="flex flex-wrap gap-1">
+                            {playlist.tracks.map((track, i) => (
+                              <span
+                                key={`${track}-${i}`}
+                                className="px-1.5 py-0.5 rounded bg-accent/10 border border-accent/20 text-accent font-mono text-[9px] font-bold uppercase tracking-wider"
+                              >
+                                {track}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {playlist.cars.length > 0 && (
+                        <div className="flex items-start gap-1.5">
+                          <Car className="w-3 h-3 text-zinc-600 shrink-0 mt-0.5" />
+                          <div className="flex flex-wrap gap-1">
+                            {playlist.cars.map((car, i) => (
+                              <span
+                                key={`${car}-${i}`}
+                                className="px-1.5 py-0.5 rounded bg-zinc-800/80 border border-zinc-700/60 text-zinc-400 font-mono text-[9px] font-bold uppercase tracking-wider"
+                              >
+                                {car}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </motion.div>
 
                 {isSelected && (
@@ -261,6 +347,12 @@ export default function PlaylistsPage() {
                           })}
                         </div>
                       </div>
+                      <RaceBreakdown
+                        playlist={playlist}
+                        selectedTracks={selectedTracks}
+                        selectedCars={selectedCars}
+                      />
+
                       {(() => {
                         const raceEvolutionData: any[] = [];
                         const numRaces = playlist.results[0]?.raceScores.length || 0;
@@ -270,7 +362,8 @@ export default function PlaylistsPage() {
 
                         for (let i = 0; i < numRaces; i++) {
                           const prefix = config.id === 'golf' ? 'B' : 'G';
-                          const racePoint: any = { name: `${prefix}${i + 1}` };
+                          // Where the CSV names the circuit, it labels the axis better than G1/G2.
+                          const racePoint: any = { name: playlist.tracks[i] || `${prefix}${i + 1}` };
 
                           playlist.results.forEach(r => {
                             cumulativePoints[r.player] += r.raceScores[i] || 0;
@@ -354,4 +447,9 @@ export default function PlaylistsPage() {
       <Footer />
     </main>
   )
+}
+
+/** `['all']` (or nothing selected) is the neutral state of every filter here. */
+function isNeutral(selection: string[]): boolean {
+  return selection.length === 0 || selection.includes('all')
 }

@@ -9,6 +9,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        // Narrow phones hide the filter labels below this width.
+        xs: '400px',
+      },
       colors: {
         zinc: {
           900: '#18181b',

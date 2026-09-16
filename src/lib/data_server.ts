@@ -63,7 +63,9 @@ export function parseCSV(): RaceEntry[] {
         puntiTotali,
         punteggiSingoleGare: parseScores(row.punteggi_singole_gare || ''),
         numGare,
-        uploadDate
+        uploadDate,
+        tracks: [],
+        cars: []
       })
     }
   }
@@ -208,6 +210,8 @@ export function getPlaylistData(entries: RaceEntry[]): PlaylistData[] {
       videoOwner: playlistEntries[0]?.videoOwner || '',
       videoTitle: playlistEntries[0]?.videoTitle || '',
       videoLink: playlistEntries[0]?.videoLink || '',
+      tracks: [],
+      cars: [],
       results: sorted
     })
   }

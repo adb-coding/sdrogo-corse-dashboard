@@ -33,7 +33,10 @@ export function Footer() {
                         </h4>
                         <ul className="flex flex-col gap-2 text-[11px] font-mono font-bold uppercase tracking-widest md:items-center">
                             <li>
-                                <Link href="/" className="text-zinc-600 hover:text-accent transition-colors">Classifica Generale</Link>
+                                <Link href="/dashboard" className="text-zinc-600 hover:text-accent transition-colors">Classifica Generale</Link>
+                            </li>
+                            <li>
+                                <Link href="/" className="text-zinc-600 hover:text-accent transition-colors">Scegli Gioco</Link>
                             </li>
                             <li>
                                 <Link href="/playlists" className="text-zinc-600 hover:text-accent transition-colors">Storico Elenchi</Link>

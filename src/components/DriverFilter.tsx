@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence, Driver } from 'framer-motion'
-import { Trophy, Calendar, ChevronDown, Check, X } from 'lucide-react'
-import { GameMode, GAME_CONFIGS } from '@/lib/game-config'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Trophy, ChevronDown, Check } from 'lucide-react'
+import { summarizeSelection } from '@/lib/filter-utils'
 
 
 interface DriverFilterProps {
@@ -52,18 +52,18 @@ export function DriverFilter({ availableDrivers, selectedDrivers, onDriverChange
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-4 bg-zinc--900/50 p-2.5 rounded-xl order border-zinc-800 hover:border-zinc-700 transition-all min--w-[200px] text-left"
+                className="flex items-center gap-2 sm:gap-3 bg-zinc-900/50 p-1.5 rounded-xl border border-zinc-800 hover:border-zinc-700 transition-all w-full sm:w-[210px] text-left"
             >
-                <div className="flex items-center gap-2 px-3 py-1.5 border-r border-zinc-800">
+                <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 border-r border-zinc-800 shrink-0">
                     <Trophy className="w-4 h-4 text-zinc-500" />
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400">Pilota</span>
+                    <span className="hidden xs:inline text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400">Pilota</span>
                 </div>
 
-                <div className="flex-1 flex items-center justify-between gap-2 pr-2">
+                <div className="flex-1 flex items-center justify-between gap-2 pr-2 min-w-0">
                     <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-white truncate">
-                        {isAllSelected ? 'All' : selectedDrivers.sort().join(', ')}
+                        {summarizeSelection([...selectedDrivers].sort(), 'All')}
                     </span>
-                    <ChevronDown className={`w-3 h-3 text-zinc-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-3 h-3 text-zinc-500 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                 </div>
             </button>
 
@@ -73,7 +73,7 @@ export function DriverFilter({ availableDrivers, selectedDrivers, onDriverChange
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-2 w-full min-w-[240px] bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl z-50 overflow-hidden"
+                    className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-[min(280px,calc(100vw-2rem))] sm:w-[240px] max-h-[320px] overflow-y-auto bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl z-50"
                 >
                     <div className="p-2 space-y-1">
                     <button

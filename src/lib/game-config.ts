@@ -1,6 +1,6 @@
 import { RaceEntry } from '@/types'
 
-export type GameMode = 'racing' | 'golf'
+export type GameMode = 'racing' | 'golf' | 'iracing'
 
 export interface GameConfig {
   id: GameMode
@@ -13,6 +13,10 @@ export interface GameConfig {
   subtitle: string
   /** Short brand used for the toggle "logo" */
   brandShort: string
+  /** Logo shown in the game switcher and on the game picker card */
+  logo: string
+  /** One-liner describing the game on the picker page */
+  description: string
   /** Minimum playlists to appear in the all-time ranking */
   minPlaylistsAllTime: number
   /** Word used where a generic "points" label is shown (e.g. Punti / Colpi) */
@@ -21,7 +25,9 @@ export interface GameConfig {
   nav: { home: string; playlists: string; drivers: string }
   /** Singular noun for one competitor (e.g. Pilota / Giocatore) */
   playerSingular: string
-  /** Hex accents for Recharts / inline styles (mirror the CSS vars in globals.css) */
+  /** Hex accents. Single source of truth: applyTheme() writes these into the
+   *  --accent / --accent-secondary CSS vars, so every border, text-accent and
+   *  glow in the UI follows whatever is set here. */
   colors: { accent: string; accentSecondary: string }
   // Date of last update of the standing
   update: string
@@ -35,6 +41,8 @@ export const GAME_CONFIGS: Record<GameMode, GameConfig> = {
     title: 'Sdrogo Corse',
     subtitle: 'Statistiche Ufficiali del Campionato',
     brandShort: 'Sdrogo Corse',
+    logo: '/assets/gta5-logo.png',
+    description: 'Gare folli su GTA V: elenchi di gare, punti e caos. Il campionato storico delle Sdrogo Corse.',
     minPlaylistsAllTime: 7,
     scoreLabel: 'Punti',
     nav: { home: 'Classifica', playlists: 'Elenchi', drivers: 'Piloti' },
@@ -49,6 +57,8 @@ export const GAME_CONFIGS: Record<GameMode, GameConfig> = {
     title: 'Golfatine',
     subtitle: 'Statistiche Ufficiali del Tour',
     brandShort: 'Golf With Your Friends',
+    logo: '/assets/golf-logo.png',
+    description: 'Golf With Your Friends: 18 buche a colpi, dove vince chi ne fa di meno. Il tour delle Golfatine.',
     minPlaylistsAllTime: 5,
     scoreLabel: 'Colpi',
     nav: { home: 'Classifica', playlists: 'Elenchi', drivers: 'Golfisti' },
@@ -56,7 +66,33 @@ export const GAME_CONFIGS: Record<GameMode, GameConfig> = {
     colors: { accent: '#22c55e', accentSecondary: '#06b6d4' },
     update: '09-09-2026',
   },
+  iracing: {
+    id: 'iracing',
+    csvPath: '/iracing.csv',
+    lowerIsBetter: false,
+    title: 'iRacing',
+    subtitle: 'Statistiche Ufficiali del Tour',
+    brandShort: 'iRacing Arcade',
+    logo: '/assets/iracing-Logo.png',
+    description: 'iRacing Arcade: circuiti reali e vetture diverse ad ogni gara. Il campionato piu recente.',
+    minPlaylistsAllTime: 1,
+    scoreLabel: 'Punti',
+    nav: {home: 'Classifica', playlists: 'Elenchi', drivers: 'Piloti'},
+    playerSingular: 'Pilota',
+    colors: { accent: '#2380eb', accentSecondary: '#df0f0f'},
+    update: '16-09-2026'
+   },
 }
+
+/** '#ef4444' -> '239 68 68', the channel triplet the --accent CSS var expects. */
+export function hexToRgbChannels(hex: string): string {
+  const clean = hex.replace('#', '').slice(0, 6)
+  const int = parseInt(clean, 16)
+  return `${(int >> 16) & 255} ${(int >> 8) & 255} ${int & 255}`
+}
+
+/** Display order of the games in the switcher and on the picker page. */
+export const GAME_ORDER: GameMode[] = ['racing', 'golf', 'iracing']
 
 /** Bigger total = better for racing, smaller total = better for golf. */
 export function compareScores(a: number, b: number, lowerIsBetter: boolean): number {

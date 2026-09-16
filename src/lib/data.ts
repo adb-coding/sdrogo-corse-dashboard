@@ -1,11 +1,17 @@
 import Papa from 'papaparse'
-import { RaceEntry, PlayerStats, PlaylistData, PlaylistResult } from '@/types'
+import { RaceEntry, PlayerStats, PlaylistData, PlaylistResult, RaceDetail, PackageStat } from '@/types'
 import { normalizePlayerName, getPlayerImage as getPlayerImageFromColors } from './colors'
 import { compareScores } from './game-config'
 
 const parseScores = (scoreString: string): number[] => {
   if (!scoreString) return []
   return scoreString.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n))
+}
+
+/** "Aragon, Miami, Sachsering" -> ['Aragon', 'Miami', 'Sachsering'] (iRacing only). */
+const parseList = (value: string): string[] => {
+  if (!value) return []
+  return value.split(',').map(s => s.trim()).filter(Boolean)
 }
 
 const getPlayerImage = (normalizedName: string): string | null => {
@@ -79,7 +85,9 @@ export async function parseCSV(filePath: string): Promise<RaceEntry[]> {
               numGare,
               videoTitle,
               videoLink,
-              uploadDate
+              uploadDate,
+              tracks: parseList(row.track || ''),
+              cars: parseList(row.car || '')
             })
           }
         }
@@ -260,6 +268,9 @@ export function getPlaylistData(entries: RaceEntry[], lowerIsBetter: boolean = f
       videoOwner: playlistEntries[0]?.videoOwner || '',
       videoTitle: playlistEntries[0]?.videoTitle || '',
       videoLink: playlistEntries[0]?.videoLink || '',
+      // Track/car are per-playlist properties: every row of an elenco repeats them.
+      tracks: playlistEntries[0]?.tracks || [],
+      cars: playlistEntries[0]?.cars || [],
       results: sorted
     })
   }
@@ -308,4 +319,181 @@ export function getHeadToHead(player1: string, player2: string, entries: RaceEnt
   }
   
   return { player1Wins, player2Wins, ties }
+}
+/* ------------------------------------------------------------------ */
+/* iRacing: per-race track/car breakdowns                              */
+/* ------------------------------------------------------------------ */
+
+/** Every distinct track (or car) that appears across the given entries. */
+export function getAvailablePackages(entries: RaceEntry[], key: 'tracks' | 'cars'): string[] {
+  const set = new Set<string>()
+  for (const entry of entries) {
+    for (const value of entry[key]) set.add(value)
+  }
+  return Array.from(set).sort((a, b) => a.localeCompare(b))
+}
+
+/**
+ * Rebuilds each entry keeping only the races run on the selected circuits/cars,
+ * recomputing its totals so every downstream stat (points, wins, positions)
+ * reflects just that subset. Entries left with no race are dropped.
+ * `['all']` or an empty array means "no narrowing" for that dimension.
+ */
+export function filterEntriesByPackages(
+  entries: RaceEntry[],
+  tracks: string[],
+  cars: string[]
+): RaceEntry[] {
+  const trackNeutral = tracks.length === 0 || tracks.includes('all')
+  const carNeutral = cars.length === 0 || cars.includes('all')
+  if (trackNeutral && carNeutral) return entries
+
+  const filtered: RaceEntry[] = []
+
+  for (const entry of entries) {
+    const numRaces = Math.max(
+      entry.punteggiSingoleGare.length,
+      entry.tracks.length,
+      entry.cars.length
+    )
+
+    const kept: number[] = []
+    for (let i = 0; i < numRaces; i++) {
+      if (!trackNeutral && !tracks.includes(entry.tracks[i])) continue
+      if (!carNeutral && !cars.includes(entry.cars[i])) continue
+      kept.push(i)
+    }
+    if (kept.length === 0) continue
+
+    const scores = kept.map(i => entry.punteggiSingoleGare[i] ?? 0)
+    filtered.push({
+      ...entry,
+      punteggiSingoleGare: scores,
+      puntiTotali: scores.reduce((a, b) => a + b, 0),
+      numGare: kept.length,
+      tracks: kept.map(i => entry.tracks[i] || ''),
+      cars: kept.map(i => entry.cars[i] || '')
+    })
+  }
+
+  return filtered
+}
+
+/**
+ * Splits a playlist into its individual races, each carrying the circuit and
+ * car package it was run with plus that race's own standings. Races with no
+ * scores at all (all players missing that index) are dropped.
+ */
+export function getRaceDetails(playlist: PlaylistData, lowerIsBetter: boolean = false): RaceDetail[] {
+  const numRaces = Math.max(
+    ...playlist.results.map(r => r.raceScores.length),
+    playlist.tracks.length,
+    playlist.cars.length,
+    0
+  )
+
+  const races: RaceDetail[] = []
+
+  for (let i = 0; i < numRaces; i++) {
+    const results = playlist.results
+      .filter(r => r.raceScores[i] !== undefined)
+      .map(r => ({ player: r.player, score: r.raceScores[i] }))
+      .sort((a, b) => compareScores(a.score, b.score, lowerIsBetter))
+
+    if (results.length === 0) continue
+
+    races.push({
+      index: i,
+      track: playlist.tracks[i] || '',
+      car: playlist.cars[i] || '',
+      results: results.map((r, position) => ({ ...r, position: position + 1 }))
+    })
+  }
+
+  return races
+}
+
+/**
+ * Aggregates every race grouped by circuit (or by car package): how often it
+ * was run, the average score it yields and who wins on it most.
+ */
+export function getPackageStats(
+  playlists: PlaylistData[],
+  key: 'tracks' | 'cars',
+  lowerIsBetter: boolean = false
+): PackageStat[] {
+  const buckets = new Map<string, {
+    races: number
+    playlists: Set<number>
+    scoreSum: number
+    scoreCount: number
+    wins: Map<string, number>
+    perPlayer: Map<string, { sum: number; races: number }>
+  }>()
+
+  for (const playlist of playlists) {
+    for (const race of getRaceDetails(playlist, lowerIsBetter)) {
+      const name = key === 'tracks' ? race.track : race.car
+      if (!name) continue
+
+      let bucket = buckets.get(name)
+      if (!bucket) {
+        bucket = {
+          races: 0,
+          playlists: new Set(),
+          scoreSum: 0,
+          scoreCount: 0,
+          wins: new Map(),
+          perPlayer: new Map()
+        }
+        buckets.set(name, bucket)
+      }
+
+      bucket.races++
+      bucket.playlists.add(playlist.elencoId)
+
+      for (const result of race.results) {
+        const player = normalizePlayerName(result.player)
+        bucket.scoreSum += result.score
+        bucket.scoreCount++
+
+        const entry = bucket.perPlayer.get(player) || { sum: 0, races: 0 }
+        entry.sum += result.score
+        entry.races++
+        bucket.perPlayer.set(player, entry)
+      }
+
+      // Everyone tied on the best score of the race counts as a winner.
+      const winningScore = race.results[0].score
+      for (const result of race.results) {
+        if (result.score !== winningScore) break
+        const player = normalizePlayerName(result.player)
+        bucket.wins.set(player, (bucket.wins.get(player) || 0) + 1)
+      }
+    }
+  }
+
+  const stats: PackageStat[] = []
+
+  for (const [name, bucket] of buckets) {
+    const wins = Array.from(bucket.wins, ([player, w]) => ({ player, wins: w }))
+      .sort((a, b) => b.wins - a.wins || a.player.localeCompare(b.player))
+
+    const averages = Array.from(bucket.perPlayer, ([player, { sum, races }]) => ({
+      player,
+      avg: Number((sum / races).toFixed(1)),
+      races
+    })).sort((a, b) => compareScores(a.avg, b.avg, lowerIsBetter) || a.player.localeCompare(b.player))
+
+    stats.push({
+      name,
+      races: bucket.races,
+      playlists: bucket.playlists.size,
+      avgScore: bucket.scoreCount > 0 ? Number((bucket.scoreSum / bucket.scoreCount).toFixed(1)) : 0,
+      wins,
+      averages
+    })
+  }
+
+  return stats.sort((a, b) => b.races - a.races || a.name.localeCompare(b.name))
 }

@@ -33,6 +33,10 @@ export interface PlaylistData {
   videoOwner: string
   videoTitle?: string
   videoLink?: string
+  /** iRacing: circuit of each race, aligned with raceScores */
+  tracks: string[]
+  /** iRacing: car package of each race, aligned with raceScores */
+  cars: string[]
   results: PlaylistResult[]
 }
 
@@ -53,6 +57,31 @@ export interface RaceEntry {
   punteggiSingoleGare: number[]
   numGare: number
   uploadDate?: string
+  /** iRacing: circuit of each race, aligned with punteggiSingoleGare */
+  tracks: string[]
+  /** iRacing: car package of each race, aligned with punteggiSingoleGare */
+  cars: string[]
 }
 
 export type SortKey = 'totalPoints' | 'avgPoints' | 'playlistsWon' | 'winRate' | 'playlistsPlayed' | 'totalVsPar' | 'avgVsPar' | 'holeInOne'
+/** One race inside a playlist, with the circuit and car it was run on. */
+export interface RaceDetail {
+  /** Position of the race within the playlist (0-based) */
+  index: number
+  track: string
+  car: string
+  results: { player: string; score: number; position: number }[]
+}
+
+/** Aggregated performance across every race run on one circuit or car package. */
+export interface PackageStat {
+  name: string
+  races: number
+  playlists: number
+  /** Mean score over every driver-race on this package */
+  avgScore: number
+  /** Race wins per normalized driver name, best first */
+  wins: { player: string; wins: number }[]
+  /** Average score per normalized driver name, best first */
+  averages: { player: string; avg: number; races: number }[]
+}

@@ -16,13 +16,9 @@
   --accent-secondary: 249 115 22;
 }
 
-/* Racing (default) keeps the red/orange accents above.
-   Golf re-themes to green/cyan; all .neon/.rank/.driver utilities below read
-   the vars, so the whole UI re-skins from this single switch. */
-[data-theme='golf'] {
-  --accent: 34 197 94;
-  --accent-secondary: 6 182 212;
-}
+/* The :root values above are only the pre-hydration default (racing). The real
+   per-game accents live in GAME_CONFIGS[mode].colors and are written onto the
+   root element by applyTheme() in lib/game-mode.tsx — edit them there. */
 
 * {
   box-sizing: border-box;

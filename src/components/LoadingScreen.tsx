@@ -9,8 +9,8 @@ import { Header } from './Header'
  * The logo pulses/glows in the active accent color with orbiting dots below.
  */
 export function LoadingScreen() {
-  const { mode } = useGameMode()
-  const logo = mode === 'golf' ? '/assets/golf-logo.png' : '/assets/melagoodo-logo.png'
+  const { config } = useGameMode()
+  const logo = config.logo
 
   return (
     <main className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-zinc-950">

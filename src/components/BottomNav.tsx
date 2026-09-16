@@ -10,8 +10,11 @@ export function BottomNav() {
   const pathname = usePathname()
   const { config } = useGameMode()
 
+  // The game picker is outside the per-game navigation.
+  if (pathname === '/') return null
+
   const navItems = [
-    { href: '/', icon: <Home className="w-5 h-5" />, label: config.nav.home },
+    { href: '/dashboard', icon: <Home className="w-5 h-5" />, label: config.nav.home },
     { href: '/playlists', icon: <Trophy className="w-5 h-5" />, label: config.nav.playlists },
     { href: '/drivers', icon: <Users className="w-5 h-5" />, label: config.nav.drivers },
   ]

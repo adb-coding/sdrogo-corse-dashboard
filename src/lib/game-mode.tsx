@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
-import { GameMode, GameConfig, GAME_CONFIGS } from './game-config'
+import { GameMode, GameConfig, GAME_CONFIGS, GAME_ORDER, hexToRgbChannels } from './game-config'
 
 interface GameModeContextValue {
   mode: GameMode
@@ -15,9 +15,14 @@ const GameModeContext = createContext<GameModeContextValue | undefined>(undefine
 const STORAGE_KEY = 'gameMode'
 
 function applyTheme(mode: GameMode) {
-  if (typeof document !== 'undefined') {
-    document.documentElement.dataset.theme = mode
-  }
+  if (typeof document === 'undefined') return
+  const root = document.documentElement
+  root.dataset.theme = mode
+  // Push the config's hex accents into the CSS vars every accent-coloured
+  // border/text/glow reads, so editing GAME_CONFIGS re-skins the whole UI.
+  const { accent, accentSecondary } = GAME_CONFIGS[mode].colors
+  root.style.setProperty('--accent', hexToRgbChannels(accent))
+  root.style.setProperty('--accent-secondary', hexToRgbChannels(accentSecondary))
 }
 
 export function GameModeProvider({ children }: { children: React.ReactNode }) {
@@ -29,7 +34,7 @@ export function GameModeProvider({ children }: { children: React.ReactNode }) {
     const saved = (typeof window !== 'undefined'
       ? (localStorage.getItem(STORAGE_KEY) as GameMode | null)
       : null)
-    if (saved === 'racing' || saved === 'golf') {
+    if (saved && saved in GAME_CONFIGS) {
       setModeState(saved)
       applyTheme(saved)
     } else {
@@ -45,8 +50,11 @@ export function GameModeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  // Cycles through every game in order; the header dropdown is the main
+  // selector, this stays for keyboard/legacy callers.
   const toggleMode = useCallback(() => {
-    setMode(mode === 'racing' ? 'golf' : 'racing')
+    const next = GAME_ORDER[(GAME_ORDER.indexOf(mode) + 1) % GAME_ORDER.length]
+    setMode(next)
   }, [mode, setMode])
 
   const value: GameModeContextValue = {

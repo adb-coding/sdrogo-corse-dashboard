@@ -3,9 +3,9 @@
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft, User, Trophy, Activity, Target, ShieldCheck, X, ExternalLink, Info, ChevronDown, Check, Youtube, Instagram, Twitch, Flag } from 'lucide-react'
-import { Header, SeasonFilter, Footer } from '@/components'
-import { parseCSV, processPlayerStats, getHeadToHead, filterEntriesBySeason, getAvailableYears } from '@/lib/data'
+import { ArrowLeft, User, Trophy, Activity, Target, ShieldCheck, X, ExternalLink, Info, ChevronDown, Check, Youtube, Instagram, Twitch, Flag, MapPin, Car } from 'lucide-react'
+import { Header, SeasonFilter, MultiSelectFilter, RaceBreakdown, Footer } from '@/components'
+import { parseCSV, processPlayerStats, getHeadToHead, filterEntriesBySeason, getAvailableYears, getAvailablePackages, filterEntriesByPackages, getPlaylistData } from '@/lib/data'
 import { getPlayerColor } from '@/lib/colors'
 import { PlayerStats, RaceEntry } from '@/types'
 import { useGameMode } from '@/lib/game-mode'
@@ -23,6 +23,8 @@ const TEAM_COLORS: Record<string, string> = {
 export default function DriversPage() {
   const { config } = useGameMode()
   const [seasons, setSeasons] = useState<string[]>(['all'])
+  const [selectedTracks, setSelectedTracks] = useState<string[]>(['all'])
+  const [selectedCars, setSelectedCars] = useState<string[]>(['all'])
   const [players, setPlayers] = useState<PlayerStats[]>([])
   const [allEntries, setAllEntries] = useState<RaceEntry[]>([])
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerStats | null>(null)
@@ -30,9 +32,15 @@ export default function DriversPage() {
 
   const availableYears = useMemo(() => getAvailableYears(allEntries), [allEntries])
 
+  const availableTracks = useMemo(() => getAvailablePackages(allEntries, 'tracks'), [allEntries])
+  const availableCars = useMemo(() => getAvailablePackages(allEntries, 'cars'), [allEntries])
+
+  // Season first, then track/car: the package filter rebuilds each entry from
+  // only the matching races, so every stat below reflects that subset.
   const filteredEntries = useMemo(() => {
-    return filterEntriesBySeason(allEntries, seasons)
-  }, [allEntries, seasons])
+    const bySeason = filterEntriesBySeason(allEntries, seasons)
+    return filterEntriesByPackages(bySeason, selectedTracks, selectedCars)
+  }, [allEntries, seasons, selectedTracks, selectedCars])
 
   useEffect(() => {
     async function loadData() {
@@ -110,13 +118,38 @@ export default function DriversPage() {
             </h1>
             <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest mt-1">
               Schieramento Ufficiale {seasons.includes('all') ? 'All-Time' : seasons.sort().join(' + ')}
+              {!selectedTracks.includes('all') && ` — ${selectedTracks.join(', ')}`}
+              {!selectedCars.includes('all') && ` — ${selectedCars.join(', ')}`}
             </p>
           </div>
-          <SeasonFilter 
-            availableYears={availableYears}
-            selectedSeasons={seasons} 
-            onSeasonChange={setSeasons} 
-          />
+          {/* Two-up on phones so the filters don't stack into one tall column. */}
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3 md:justify-end">
+            {availableTracks.length > 0 && (
+              <MultiSelectFilter
+                label="Circuito"
+                icon={<MapPin className="w-4 h-4" />}
+                allLabel="Tutti"
+                options={availableTracks}
+                selected={selectedTracks}
+                onChange={setSelectedTracks}
+              />
+            )}
+            {availableCars.length > 0 && (
+              <MultiSelectFilter
+                label="Vettura"
+                icon={<Car className="w-4 h-4" />}
+                allLabel="Tutte"
+                options={availableCars}
+                selected={selectedCars}
+                onChange={setSelectedCars}
+              />
+            )}
+            <SeasonFilter 
+              availableYears={availableYears}
+              selectedSeasons={seasons} 
+              onSeasonChange={setSeasons} 
+            />
+          </div>
         </div>
 
         <AnimatePresence mode="wait">
@@ -127,6 +160,12 @@ export default function DriversPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
+              {players.length === 0 && (
+                <div className="p-12 rounded-xl border border-dashed border-zinc-800 text-center text-[10px] font-mono uppercase tracking-widest text-zinc-600">
+                  Nessun {config.playerSingular.toLowerCase()} ha corso con questi filtri
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {players.map((player, index) => (
                   <motion.div
@@ -236,7 +275,7 @@ export default function DriversPage() {
 }
 
 function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats; allPlayers: PlayerStats[]; allEntries: RaceEntry[] }) {
-  const { config } = useGameMode()
+  const { config, mode } = useGameMode()
   const lowerIsBetter = config.lowerIsBetter
   const [selectedElenco, setSelectedElenco] = useState<{ id: number; index: number } | null>(null)
   const [comparisonPlayer, setComparisonPlayer] = useState<PlayerStats | null>(null)
@@ -327,7 +366,6 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
     
     const elencoId = player.elencoIds[selectedElenco.index]
     const playlistEntries = allEntries.filter(e => e.elencoId === elencoId)
-    const { mode } = useGameMode() 
     if (playlistEntries.length === 0) return { data: [], players: [] }
     
     const numGare = playlistEntries[0].numGare
@@ -346,7 +384,9 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
     
     for (let i = 0; i < numGare; i++) {
       const prefix = mode === 'golf' ? 'B' : 'G'
-      const racePoint: { name: string; [key: string]: number | string } = { name: `${prefix}${i + 1}` }
+      // Circuit names read better than G1/G2 when the CSV carries them.
+      const trackName = playlistEntries[0].tracks[i]
+      const racePoint: { name: string; [key: string]: number | string } = { name: trackName || `${prefix}${i + 1}` }
       const currentHolePar = parEntry ? (parEntry.punteggiSingoleGare || [])[i] || 0 : 0;
       
       cumulativePar += currentHolePar;
@@ -379,7 +419,16 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
         return b.localeCompare(a)
       })
     }
-  }, [selectedElenco, player, allEntries, chartMode])
+  }, [selectedElenco, player, allEntries, chartMode, mode])
+
+  // The same elenco in PlaylistData shape, so the race-by-race breakdown can
+  // reuse the component the elenchi page uses.
+  const selectedPlaylist = useMemo(() => {
+    if (!selectedElenco) return null
+    const elencoId = player.elencoIds[selectedElenco.index]
+    const entries = allEntries.filter(e => e.elencoId === elencoId)
+    return getPlaylistData(entries, lowerIsBetter)[0] || null
+  }, [selectedElenco, player, allEntries, lowerIsBetter])
 
   const playlistInfo = useMemo(() => {
     if (!selectedElenco) return null
@@ -1141,6 +1190,12 @@ function DriverProfile({ player, allPlayers, allEntries }: { player: PlayerStats
                           </LineChart>
                         </ResponsiveContainer>
                       </div>
+
+                      {selectedPlaylist && (
+                        <div className="mt-8">
+                          <RaceBreakdown playlist={selectedPlaylist} highlightPlayer={player.name} />
+                        </div>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
