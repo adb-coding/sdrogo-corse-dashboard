@@ -1,18 +1,20 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
-import { GameMode, GameConfig, GAME_CONFIGS, GAME_ORDER, hexToRgbChannels } from './game-config'
+import { GameMode, GameConfig, GAME_CONFIGS, GAME_ORDER, STORAGE_KEY, hexToRgbChannels } from './game-config'
 
 interface GameModeContextValue {
   mode: GameMode
   config: GameConfig
+  /** False until the saved choice has been read from localStorage. Pages must
+   *  wait for it before fetching, or they fetch the default game's CSV first
+   *  and race it against the real one. */
+  hydrated: boolean
   setMode: (mode: GameMode) => void
   toggleMode: () => void
 }
 
 const GameModeContext = createContext<GameModeContextValue | undefined>(undefined)
-
-const STORAGE_KEY = 'gameMode'
 
 function applyTheme(mode: GameMode) {
   if (typeof document === 'undefined') return
@@ -28,6 +30,7 @@ function applyTheme(mode: GameMode) {
 export function GameModeProvider({ children }: { children: React.ReactNode }) {
   // Default to racing on first render to keep SSR/CSR markup stable.
   const [mode, setModeState] = useState<GameMode>('racing')
+  const [hydrated, setHydrated] = useState(false)
 
   // Hydrate the saved choice once on mount.
   useEffect(() => {
@@ -40,6 +43,7 @@ export function GameModeProvider({ children }: { children: React.ReactNode }) {
     } else {
       applyTheme('racing')
     }
+    setHydrated(true)
   }, [])
 
   const setMode = useCallback((next: GameMode) => {
@@ -60,6 +64,7 @@ export function GameModeProvider({ children }: { children: React.ReactNode }) {
   const value: GameModeContextValue = {
     mode,
     config: GAME_CONFIGS[mode],
+    hydrated,
     setMode,
     toggleMode,
   }

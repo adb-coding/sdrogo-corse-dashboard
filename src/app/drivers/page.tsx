@@ -21,7 +21,7 @@ const TEAM_COLORS: Record<string, string> = {
 }
 
 export default function DriversPage() {
-  const { config } = useGameMode()
+  const { config, hydrated } = useGameMode()
   const [seasons, setSeasons] = useState<string[]>(['all'])
   const [selectedTracks, setSelectedTracks] = useState<string[]>(['all'])
   const [selectedCars, setSelectedCars] = useState<string[]>(['all'])
@@ -43,25 +43,32 @@ export default function DriversPage() {
   }, [allEntries, seasons, selectedTracks, selectedCars])
 
   useEffect(() => {
+    // Wait for the saved game, else we'd fetch the default CSV and race it.
+    if (!hydrated) return
+
+    let cancelled = false
     async function loadData() {
       try {
         setLoading(true)
         const entries = await parseCSV(config.csvPath)
+        // A newer game won the race: drop this response, it is stale.
+        if (cancelled) return
         setAllEntries(entries)
         const minPlaylists = seasons.includes('all') ? config.minPlaylistsAllTime : 0
         const playerStats = processPlayerStats(entries, minPlaylists, config.lowerIsBetter)
         setPlayers(playerStats)
         setSelectedPlayer(null)
       } catch (error) {
-        console.error('Failed to load data:', error)
+        if (!cancelled) console.error('Failed to load data:', error)
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
 
     loadData()
+    return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config.csvPath])
+  }, [config.csvPath, hydrated])
 
   useEffect(() => {
     if (allEntries.length > 0) {

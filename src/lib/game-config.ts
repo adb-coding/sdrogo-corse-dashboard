@@ -94,6 +94,34 @@ export function hexToRgbChannels(hex: string): string {
 /** Display order of the games in the switcher and on the picker page. */
 export const GAME_ORDER: GameMode[] = ['racing', 'golf', 'iracing']
 
+/** localStorage key holding the last picked game. */
+export const STORAGE_KEY = 'gameMode'
+
+/**
+ * Inline script for <head>, run before first paint: it applies the saved game's
+ * theme so the page never flashes the default accent before React hydrates.
+ * The palette is serialized from GAME_CONFIGS, so it cannot drift from it.
+ */
+export function buildThemeBootstrapScript(): string {
+  const palette = Object.fromEntries(
+    GAME_ORDER.map(id => [
+      id,
+      [
+        hexToRgbChannels(GAME_CONFIGS[id].colors.accent),
+        hexToRgbChannels(GAME_CONFIGS[id].colors.accentSecondary),
+      ],
+    ])
+  )
+
+  return `(function(){try{
+var p=${JSON.stringify(palette)},k=${JSON.stringify(STORAGE_KEY)};
+var m=localStorage.getItem(k);if(!m||!p[m])m=${JSON.stringify(GAME_ORDER[0])};
+var r=document.documentElement;r.dataset.theme=m;
+r.style.setProperty('--accent',p[m][0]);
+r.style.setProperty('--accent-secondary',p[m][1]);
+}catch(e){}})();`
+}
+
 /** Bigger total = better for racing, smaller total = better for golf. */
 export function compareScores(a: number, b: number, lowerIsBetter: boolean): number {
   return lowerIsBetter ? a - b : b - a

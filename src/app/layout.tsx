@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { BottomNav } from '@/components'
 import { GameModeProvider } from '@/lib/game-mode'
+import { buildThemeBootstrapScript } from '@/lib/game-config'
 import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
@@ -20,6 +21,10 @@ export default function RootLayout({
   return (
     <html lang="it">
       <body className="bg-zinc-950 text-white min-h-screen">
+        {/* Blocking, and first thing in the body: applies the saved game's
+            accents before any content paints, so a refresh never flashes the
+            default red theme. */}
+        <script dangerouslySetInnerHTML={{ __html: buildThemeBootstrapScript() }} />
         <GameModeProvider>
           {children}
           <BottomNav />

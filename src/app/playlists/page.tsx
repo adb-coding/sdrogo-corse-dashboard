@@ -13,7 +13,7 @@ import Link from 'next/link'
 
 
 export default function PlaylistsPage() {
-  const { config } = useGameMode()
+  const { config, hydrated } = useGameMode()
   const [seasons, setSeasons] = useState<string[]>(['all'])
   const [selectedDrivers, setSelectedDrivers] = useState<string[]>([])
   const [selectedTracks, setSelectedTracks] = useState<string[]>(['all'])
@@ -24,20 +24,27 @@ export default function PlaylistsPage() {
   const [selectedId, setSelectedId] = useState<number | null>(null)
 
   useEffect(() => {
+    // Wait for the saved game, else we'd fetch the default CSV and race it.
+    if (!hydrated) return
+
+    let cancelled = false
     async function loadData() {
       try {
         setLoading(true)
         const entries = await parseCSV(config.csvPath)
+        // A newer game won the race: drop this response, it is stale.
+        if (cancelled) return
         setAllEntries(entries)
       } catch (error) {
-        console.error('Failed to load data:', error)
+        if (!cancelled) console.error('Failed to load data:', error)
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
 
     loadData()
-  }, [config.csvPath])
+    return () => { cancelled = true }
+  }, [config.csvPath, hydrated])
 
   const availableYears = useMemo(() => getAvailableYears(allEntries), [allEntries])
 

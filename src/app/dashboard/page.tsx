@@ -22,20 +22,27 @@ import { PlayerStats, PlaylistData, RaceEntry } from '@/types'
 import { useGameMode } from '@/lib/game-mode'
 
 export default function Home() {
-  const { config } = useGameMode()
+  const { config, hydrated } = useGameMode()
   const [seasons, setSeasons] = useState<string[]>(['all'])
   const [allEntries, setAllEntries] = useState<RaceEntry[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Wait for the saved game, else we'd fetch the default CSV and race it.
+    if (!hydrated) return
+
+    let cancelled = false
     async function loadData() {
       setLoading(true)
       const entries = await parseCSV(config.csvPath)
+      // A newer game won the race: drop this response, it is stale.
+      if (cancelled) return
       setAllEntries(entries)
       setLoading(false)
     }
     loadData()
-  }, [config.csvPath])
+    return () => { cancelled = true }
+  }, [config.csvPath, hydrated])
 
   const availableYears = useMemo(() => getAvailableYears(allEntries), [allEntries])
 
