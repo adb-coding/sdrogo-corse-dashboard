@@ -15,7 +15,7 @@ const getPlayerImage = (normalizedName: string): string | null => {
 const PLAYER_TAGS: Record<string, string[]> = {
   Marza: ['Marzone'],
   Dread: ['Dreddonico Bobby'],
-  Gabbo: ['Gabbo Di Smerdaland'],
+  Gabbo: ['Cannuccia Bianca'],
   Masseo: ['Ghesboro DC'],
   Rohn: ['Just Fucking Just'],
   Mollu: ['Non Pippo Più'],
